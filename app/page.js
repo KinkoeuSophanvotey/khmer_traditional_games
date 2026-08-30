@@ -1,4 +1,5 @@
 import collection from "../collection.config.js";
+import EntryCard from "../components/EntryCard";
 
 const styles = {
   wrap: {
@@ -72,7 +73,22 @@ export default function Home() {
         <p style={styles.cardValue}>{collection.source}</p>
       </div>
 
-      <p style={styles.count}>entries in the archive: 0 (for now)</p>
+      <EntryCard
+        title="Veay K’aom or Hit the Earthen Pot Game (ល្បែងវាយក្អម)"
+        description={`Description: Veay K’aom is a traditional Khmer game in which a blindfolded player tries to hit and break an earthen pot hanging from a rope with a stick. It is commonly associated with Khmer New Year celebrations and community gatherings.
+How it is played: An earthen pot is hung from a rope at a suitable height. The player is blindfolded and turned around three times before being given a stick. The player then tries to locate the hanging pot and hit it with the stick. The player continues trying until the pot is hit and broken or the allowed number of misses is reached.
+Rules: The player must remain blindfolded while attempting to hit the pot. The player loses after three misses. Successfully hitting and breaking the pot means the player wins.`}
+        contributor="Grandparents / older people"
+        place="Pagoda grounds and village community spaces in Cambodia, especially during Khmer New Year."
+      />
+      <EntryCard
+        title="Khlaeng Jarb Kon Morn (ល្បែងក្លែងចាប់កូនមាន់)"
+        description={`Description: Khlaeng Jarb Kon Khlaeng is a traditional Khmer group game in which one player acts as the khlaeng and tries to catch the chicks while another player acts as the hen and protects them. Several players form a group of chicks behind the hen. The game encourages teamwork, movement, and quick reactions.
+How it is played: One player becomes the hen, several players become the chicks, and another player becomes the khlaeng. The chicks form a line behind the hen and hold onto one another. The khlaeng tries to move around the group and catch the chicks, especially those at the back. The hen moves from side to side to protect the chicks and prevent the khlaeng from reaching them.
+Rules: The chicks must stay together and hold onto one another. The hen must try to protect the chicks from the khlaeng. The khlaeng tries to catch a chick while the hen attempts to block or avoid the khlaeng. Players can change roles and begin another round after the game ends.`}
+        contributor="Grandparents / older people"
+        place="Village communities and open community spaces in Cambodia, especially during Khmer New Year and other traditional gatherings."
+      />
 
       <footer style={styles.footer}>
         Built in ICT 340 — Vibe Coding, American University of Phnom Penh, Fall
