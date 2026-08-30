@@ -89,7 +89,7 @@ Rules: The chicks must stay together and hold onto one another. The hen must try
         contributor="Grandparents / older people"
         place="Village communities and open community spaces in Cambodia, especially during Khmer New Year and other traditional gatherings."
       />
-
+      <p style={styles.count}>Entries in the archive: 2 (for now)</p>
       <footer style={styles.footer}>
         Built in ICT 340 — Vibe Coding, American University of Phnom Penh, Fall
         2026. This archive is under construction all semester. Come back in
