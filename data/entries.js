@@ -24,7 +24,7 @@ export default [
     "place": "Village community spaces in Takeo Province, Cambodia"
   },
   {
-    "title": "Leaf Grabbing or Catching Game (ល្បែងដណ្ដើមស្លឹកឈើ)",
+    "title": "Leaf Grabbing or Dan Derm Sloek Chhoer (ល្បែងដណ្ដើមស្លឹកឈើ)",
     "description": "Dan Derm Sloek Chhoer is a traditional Khmer reaction game for two players. A leaf is placed between the players, and they compete to grab it as quickly as possible. The game tests players’ concentration, speed, and quick reactions.",
     "howItIsPlayed": "Two players sit or stand facing each other with a leaf placed between them. They wait for a signal or agreed moment before trying to grab the leaf. Both players quickly reach toward the leaf, and the player who grabs it first wins the round. Players can switch positions or play several rounds to determine the overall winner.",
     "rules": "Players must wait for the agreed signal before grabbing the leaf. Players should not take the leaf before the signal or interfere with the other player's movement. The player who grabs the leaf first wins the round, while the other player loses that round.",
