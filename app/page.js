@@ -1,5 +1,8 @@
+"use client";
+
 import collection from "../collection.config.js";
 import EntryCard from "../components/EntryCard";
+import { useState } from "react";
 import entries from "../data/entries.js";
 
 const styles = {
@@ -59,11 +62,39 @@ const styles = {
 };
 
 export default function Home() {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredEntries = entries.filter((entry) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      entry.title.toLowerCase().includes(search) ||
+      entry.description.toLowerCase().includes(search)
+    );
+  });
+
   return (
     <main style={styles.wrap}>
       <p style={styles.kicker}>KHMER LIVING ARCHIVE</p>
       <h1 style={styles.title}>{collection.name}</h1>
       <p style={styles.description}>{collection.description}</p>
+
+      <input
+        type="text"
+        placeholder="Search games..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+          width: '100%',
+          boxSizing: 'border-box',
+          margin: '16px 0 16px',
+          padding: '12px 16px',
+          backgroundColor: '#1C222C',
+          border: '1px solid #2E3644',
+          borderRadius: '8px',
+          color: '#E8EDF2',
+          fontSize: '16px',
+        }}
+      />
 
       <div style={styles.card}>
         <p style={styles.cardLabel}>CURATED BY</p>
@@ -74,16 +105,23 @@ export default function Home() {
         <p style={styles.cardValue}>{collection.source}</p>
       </div>
 
-            {entries.map((entry, index) => (
-        <EntryCard
-          key={index}
-          title={entry.title}
-          description={`${entry.description}\n\nHow it is played: ${entry.howItIsPlayed}\n\nRules: ${entry.rules}`}
-          contributor={entry.contributor}
-          place={entry.place}
-        />
-      ))}
-      <p style={styles.count}>Entries in the archive: {entries.length}</p>
+            {filteredEntries.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '48px 24px', color: '#97A1B3' }}>
+          <p style={{ fontSize: '18px', marginBottom: '8px' }}>No games found matching your search.</p>
+          <p style={{ fontSize: '16px' }}>រកមិនឃើញល្បែងដែលត្រូវនឹងការស្វែងរករបស់អ្នកទេ។</p>
+        </div>
+      ) : (
+        filteredEntries.map((entry, index) => (
+          <EntryCard
+            key={index}
+            title={entry.title}
+            description={`${entry.description}\n\nHow it is played: ${entry.howItIsPlayed}\n\nRules: ${entry.rules}`}
+            contributor={entry.contributor}
+            place={entry.place}
+          />
+        ))
+      )}
+      <p style={styles.count}>Entries in the archive: {filteredEntries.length}</p>
       <footer style={styles.footer}>
         Built in ICT 340 — Vibe Coding, American University of Phnom Penh, Fall
         2026. This archive is under construction all semester. Come back in
