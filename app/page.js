@@ -65,12 +65,37 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredEntries = entries.filter((entry) => {
-    const search = searchTerm.toLowerCase();
-    return (
-      entry.title.toLowerCase().includes(search) ||
-      entry.description.toLowerCase().includes(search)
-    );
-  });
+  let search = searchTerm.toLowerCase();
+  search = search.trim();
+
+  if (
+    (search.startsWith('"') && search.endsWith('"')) ||
+    (search.startsWith("'") && search.endsWith("'"))
+  ) {
+    search = search.slice(1, -1).trim();
+  }
+
+  if (search === '') return true;
+
+  const text = [
+    entry.title.en,
+    entry.title.km,
+    entry.description.en,
+    entry.description.km,
+    entry.howItIsPlayed.en,
+    entry.howItIsPlayed.km,
+    entry.rules.en,
+    entry.rules.km,
+    entry.contributor.en,
+    entry.contributor.km,
+    entry.place.en,
+    entry.place.km,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return text.includes(search);
+});
 
   return (
     <main style={styles.wrap}>
@@ -78,23 +103,43 @@ export default function Home() {
       <h1 style={styles.title}>{collection.name}</h1>
       <p style={styles.description}>{collection.description}</p>
 
-      <input
-        type="text"
-        placeholder="Search games..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{
-          width: '100%',
-          boxSizing: 'border-box',
-          margin: '16px 0 16px',
-          padding: '12px 16px',
-          backgroundColor: '#1C222C',
-          border: '1px solid #2E3644',
-          borderRadius: '8px',
-          color: '#E8EDF2',
-          fontSize: '16px',
-        }}
-      />
+      <div style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
+        <input
+          type="text"
+          placeholder="Search games..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: '100%',
+            boxSizing: 'border-box',
+            margin: '16px 0 16px',
+            padding: '12px 16px',
+            paddingRight: '32px',
+            backgroundColor: '#1C222C',
+            border: '1px solid #2E3644',
+            borderRadius: '8px',
+            color: '#E8EDF2',
+            fontSize: '16px',
+          }}
+        />
+        {searchTerm && (
+          <button
+            style={{
+              position: 'absolute',
+              right: '8px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              color: '#97A1B3',
+              fontSize: '16px',
+              cursor: 'pointer',
+              padding: '4px',
+            }}
+            onClick={() => setSearchTerm('')}
+          >{'×'}</button>
+        )}
+      </div>
 
       <div style={styles.card}>
         <p style={styles.cardLabel}>CURATED BY</p>
@@ -112,13 +157,15 @@ export default function Home() {
         </div>
       ) : (
         filteredEntries.map((entry, index) => (
-          <EntryCard
-            key={index}
-            title={entry.title}
-            description={`${entry.description}\n\nHow it is played: ${entry.howItIsPlayed}\n\nRules: ${entry.rules}`}
-            contributor={entry.contributor}
-            place={entry.place}
-          />
+        <EntryCard
+          key={index}
+          title={entry.title}
+          description={entry.description}
+          howItIsPlayed={entry.howItIsPlayed}
+          rules={entry.rules}
+          contributor={entry.contributor}
+          place={entry.place}
+        />
         ))
       )}
       <p style={styles.count}>Entries in the archive: {filteredEntries.length}</p>

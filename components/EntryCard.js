@@ -12,14 +12,27 @@ const styles = {
     margin: 0,
     marginBottom: 12,
   },
+  languageLabel: {
+    fontFamily: "'Courier New', monospace",
+    fontSize: 11,
+    color: "#97A1B3",
+    margin: 0,
+    marginBottom: 4,
+    marginTop: 8,
+  },
   description: {
     fontSize: 14,
     lineHeight: 1.6,
     margin: 0,
     marginBottom: 12,
     color: "#97A1B3",
-    // pre-wrap preserves line breaks in description text
     whiteSpace: "pre-wrap",
+  },
+  sectionLabel: {
+    fontFamily: "'Courier New', monospace",
+    fontSize: 12,
+    color: "#2EE6A8",
+    margin: "20px 0 8px",
   },
   label: {
     fontFamily: "'Courier New', monospace",
@@ -35,17 +48,53 @@ const styles = {
   },
 };
 
-export default function EntryCard({ title, description, contributor, place }) {
+export default function EntryCard({
+  title,
+  description,
+  howItIsPlayed,
+  rules,
+  contributor,
+  place,
+}) {
   return (
     <div style={styles.card}>
-      <h3 style={styles.title}>{title}</h3>
-      <p style={styles.description}>{description}</p>
+      <h3 style={styles.title}>
+        {title.en} / {title.km}
+      </h3>
+
+      <p style={styles.languageLabel}>ENGLISH</p>
+      <p style={styles.description}>{description.en}</p>
+
+      <p style={styles.languageLabel}>KHMER</p>
+      <p style={styles.description}>{description.km}</p>
+
+      <p style={styles.sectionLabel}>HOW IT IS PLAYED</p>
+
+      <p style={styles.languageLabel}>ENGLISH</p>
+      <p style={styles.description}>{howItIsPlayed.en}</p>
+
+      <p style={styles.languageLabel}>KHMER</p>
+      <p style={styles.description}>{howItIsPlayed.km}</p>
+
+      <p style={styles.sectionLabel}>RULES</p>
+
+      <p style={styles.languageLabel}>ENGLISH</p>
+      <p style={styles.description}>{rules.en}</p>
+
+      <p style={styles.languageLabel}>KHMER</p>
+      <p style={styles.description}>{rules.km}</p>
+
       <p style={styles.label}>CONTRIBUTOR</p>
-      <p style={styles.value}>{contributor}</p>
+      <p style={styles.value}>
+        {contributor.en} / {contributor.km}
+      </p>
+
       {place && (
         <>
           <p style={styles.label}>PLACE</p>
-          <p style={styles.value}>{place}</p>
+          <p style={styles.value}>
+            {place.en} / {place.km}
+          </p>
         </>
       )}
     </div>
