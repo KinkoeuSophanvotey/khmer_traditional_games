@@ -116,7 +116,7 @@ export default function EntryCard({
         />
         ) : index === 4 ? (
           <img
-            src="/Teanh-Prot.jpg"
+            src="/teanh-prot.jpg"
             alt="Teanh Prot or Tug of War"
             style={{
               width: "100%",
@@ -127,7 +127,7 @@ export default function EntryCard({
           />
         ) : index === 5 ? (
           <img
-            src="/Chol-Chhoung.jpg"
+            src="/chol-chhoung.jpg"
             alt="Chol Chhoung"
             style={{
               width: "100%",
