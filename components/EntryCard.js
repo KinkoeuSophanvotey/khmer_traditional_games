@@ -1,102 +1,181 @@
+const colors = {
+  deepGreen: "#234F3D",
+  warmBeige: "#F3EBDD",
+  mutedGold: "#B89452",
+};
+
 const styles = {
   card: {
-    marginTop: 48,
-    padding: 24,
-    backgroundColor: "#1C222C",
-    border: "1px solid #2E3644",
-    borderRadius: 10,
+    backgroundColor: colors.warmBeige,
+    border: `1px solid ${colors.mutedGold}`,
+    borderRadius: 16,
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
   },
+
+  image: {
+    width: "100%",
+    aspectRatio: "4 / 3",
+    backgroundColor: colors.deepGreen,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: colors.warmBeige,
+    fontFamily: "'Courier New', monospace",
+    fontSize: 12,
+    letterSpacing: 1,
+  },
+
+  content: {
+    padding: 20,
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
+  },
+
   title: {
     fontSize: 20,
-    fontWeight: 700,
-    margin: 0,
-    marginBottom: 12,
+    lineHeight: 1.3,
+    color: colors.deepGreen,
+    margin: "0 0 10px",
   },
-  languageLabel: {
-    fontFamily: "'Courier New', monospace",
-    fontSize: 11,
-    color: "#97A1B3",
-    margin: 0,
-    marginBottom: 4,
-    marginTop: 8,
-  },
+
   description: {
     fontSize: 14,
     lineHeight: 1.6,
-    margin: 0,
-    marginBottom: 12,
-    color: "#97A1B3",
-    whiteSpace: "pre-wrap",
+    color: colors.deepGreen,
+    margin: "0 0 20px",
   },
-  sectionLabel: {
-    fontFamily: "'Courier New', monospace",
-    fontSize: 12,
-    color: "#2EE6A8",
-    margin: "20px 0 8px",
-  },
-  label: {
-    fontFamily: "'Courier New', monospace",
-    fontSize: 12,
-    color: "#97A1B3",
-    margin: 0,
-    marginBottom: 4,
-  },
-  value: {
+
+  button: {
+    marginTop: "auto",
+    alignSelf: "flex-start",
+    padding: "9px 0",
+    backgroundColor: "transparent",
+    border: "none",
+    color: colors.deepGreen,
     fontSize: 14,
-    margin: 0,
-    color: "#E8EDF2",
+    fontWeight: 600,
+    cursor: "pointer",
   },
 };
 
 export default function EntryCard({
   title,
   description,
-  howItIsPlayed,
-  rules,
-  contributor,
-  place,
+  index,
+  lang,
 }) {
   return (
-    <div style={styles.card}>
-      <h3 style={styles.title}>
-        {title.en} / {title.km}
-      </h3>
+    <article style={styles.card}>
+      <div style={styles.image}>
+        {index === 0 ? (
+          <img
+            src="/Veay-K’aom.jpg"
+            alt="Veay K’aom or Hit the Earthen Pot Game"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+      ) : index === 1 ? (
+        <img
+          src="/khlaeng-jarb-kon-morn.jpg"
+          alt="Khlaeng Jarb Kon Morn"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+          }}
+        />
+        ) : index === 2 ? (
+          <img
+            src="/champa-champey.jpg"
+            alt="Champa Champey"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+        ) : index === 3 ? (
+        <img
+          src="/Dan-Derm-Sloek-Chhoer.jpg"
+          alt="Leaf Grabbing or Dan Derm Sloek Chhoer"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+          }}
+        />
+        ) : index === 4 ? (
+          <img
+            src="/Teanh-Prot.jpg"
+            alt="Teanh Prot or Tug of War"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+        ) : index === 5 ? (
+          <img
+            src="/Chol-Chhoung.jpg"
+            alt="Chol Chhoung"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+        ) : index === 6 ? (
+          <img
+            src="/Rorm-Donderm-Kav-Eey.jpg"
+            alt="Dancing to Seize the Chair or Rorm Donderm Kav Eey"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+        ) : index === 7 ? (
+          <img
+            src="/Lout-Bav.jpg"
+            alt="Lout Bav or Jumping Bag Game"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+        ) : (
+          "IMAGE"
+        )}
+      </div>
 
-      <p style={styles.languageLabel}>ENGLISH</p>
-      <p style={styles.description}>{description.en}</p>
+      <div style={styles.content}>
+        <h3 style={styles.title}>
+          {title[lang]}
+        </h3>
 
-      <p style={styles.languageLabel}>KHMER</p>
-      <p style={styles.description}>{description.km}</p>
+        <p style={styles.description}>
+          {description[lang]}
+        </p>
 
-      <p style={styles.sectionLabel}>HOW IT IS PLAYED</p>
-
-      <p style={styles.languageLabel}>ENGLISH</p>
-      <p style={styles.description}>{howItIsPlayed.en}</p>
-
-      <p style={styles.languageLabel}>KHMER</p>
-      <p style={styles.description}>{howItIsPlayed.km}</p>
-
-      <p style={styles.sectionLabel}>RULES</p>
-
-      <p style={styles.languageLabel}>ENGLISH</p>
-      <p style={styles.description}>{rules.en}</p>
-
-      <p style={styles.languageLabel}>KHMER</p>
-      <p style={styles.description}>{rules.km}</p>
-
-      <p style={styles.label}>CONTRIBUTOR</p>
-      <p style={styles.value}>
-        {contributor.en} / {contributor.km}
-      </p>
-
-      {place && (
-        <>
-          <p style={styles.label}>PLACE</p>
-          <p style={styles.value}>
-            {place.en} / {place.km}
-          </p>
-        </>
-      )}
-    </div>
+        <a href={`/games/${index}`} style={styles.button}>
+          {lang === "en" ? "View more →" : "មើលបន្ថែម →"}
+        </a>
+      </div>
+    </article>
   );
 }
