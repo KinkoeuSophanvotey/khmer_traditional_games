@@ -3,6 +3,7 @@
 import collection from "../collection.config.js";
 
 import { useEffect, useState } from "react";
+import { createClient } from "../lib/supabase/client.js";
 
 const colors = {
   deepGreen: "#234F3D",
@@ -158,14 +159,31 @@ const styles = {
 };
 
 export default function Home() {
-  
+  const supabase = createClient();
   const [lang, setLang] = useState("en");
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") || "en";
     setLang(savedLang);
   }, []);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
 
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
   return (
     <main style={styles.wrap}>
     <nav
@@ -217,6 +235,61 @@ export default function Home() {
         >
           {lang === "en" ? "Games" : "ល្បែង"}
         </a>
+
+        {user ? (
+          <>
+            <span
+              style={{
+                color: colors.deepGreen,
+                fontSize: "14px",
+                fontFamily: "'Courier New', monospace",
+              }}
+            >
+              {user.email}
+            </span>
+
+            <button
+              onClick={handleLogout}
+              style={{
+                background: "none",
+                border: `1px solid ${colors.mutedGold}`,
+                borderRadius: "999px",
+                padding: "8px 16px",
+                color: colors.deepGreen,
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "'Courier New', monospace",
+              }}
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <a
+              href="/login"
+              style={{
+                color: colors.deepGreen,
+                textDecoration: "none",
+                fontSize: "14px",
+              }}
+            >
+              Login
+            </a>
+
+            <a
+              href="/signup"
+              style={{
+                color: colors.deepGreen,
+                textDecoration: "none",
+                fontSize: "14px",
+              }}
+            >
+              Sign up
+            </a>
+          </>
+        )}
 
       </div>
     </nav>
