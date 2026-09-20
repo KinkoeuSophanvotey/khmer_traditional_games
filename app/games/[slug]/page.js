@@ -56,7 +56,7 @@ export default function GameDetail({ params }) {
         <img
           src={
             [
-              "/Veay-K’aom.jpg",
+              "/Hit-the-Earthen-Pot.jpg",
               "/khlaeng-jarb-kon-morn.jpg",
               "/champa-champey.jpg",
               "/Dan-Derm-Sloek-Chhoer.jpg",

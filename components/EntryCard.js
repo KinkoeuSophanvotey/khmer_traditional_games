@@ -72,7 +72,7 @@ export default function EntryCard({
       <div style={styles.image}>
         {index === 0 ? (
           <img
-            src="/Veay-K’aom.jpg"
+            src="/Hit-the-Earthen-Pot.jpg"
             alt="Veay K’aom or Hit the Earthen Pot Game"
             style={{
               width: "100%",
