@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client.js";
 
@@ -99,6 +99,12 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem("lang") || "en";
+    setLang(savedLang);
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -113,7 +119,11 @@ export default function SignupPage() {
     });
 
     if (authError) {
-      setError("Invalid email or password");
+      setError(
+        lang === "en"
+          ? "Invalid email or password"
+          : "អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ"
+      );
       return;
     }
 
@@ -122,14 +132,20 @@ export default function SignupPage() {
 
   return (
     <main style={styles.wrap}>
-      <h1 style={styles.title}>Sign Up</h1>
-      <p style={styles.subtitle}>Create your archive account</p>
+      <h1 style={styles.title}>
+        {lang === "en" ? "Sign Up" : "ចុះឈ្មោះ"}
+      </h1>
+      <p style={styles.subtitle}>
+        {lang === "en"
+          ? "Create your archive account"
+          : "បង្កើតគណនីបណ្ណសាររបស់អ្នក"}
+      </p>
       {!success ? (
         <>
           <form onSubmit={handleSubmit} style={styles.form}>
             <input
               type="email"
-              placeholder="Email"
+              placeholder={lang === "en" ? "Email" : "អ៊ីមែល"}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -137,7 +153,7 @@ export default function SignupPage() {
             />
             <input
               type="password"
-              placeholder="Password"
+              placeholder={lang === "en" ? "Password" : "ពាក្យសម្ងាត់"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -145,16 +161,20 @@ export default function SignupPage() {
             />
             {error && <p style={styles.error}>{error}</p>}
             <button type="submit" style={styles.button}>
-              Sign Up
+              {lang === "en" ? "Sign Up" : "ចុះឈ្មោះ"}
             </button>
           </form>
           <a href="/login" style={styles.link}>
-            Already have an account? Sign in
+            {lang === "en"
+              ? "Already have an account? Sign in"
+              : "មានគណនីរួចហើយមែនទេ? ចូលគណនី"}
           </a>
         </>
       ) : (
         <p style={styles.success}>
-          Account created! You can now sign in.
+          {lang === "en"
+            ? "Account created! You can now sign in."
+            : "បានបង្កើតគណនីរួចរាល់! ឥឡូវនេះអ្នកអាចចូលគណនីបាន។"}
         </p>
       )}
     </main>

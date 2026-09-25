@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client.js";
 
@@ -98,6 +98,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem("lang") || "en";
+    setLang(savedLang);
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -111,7 +117,11 @@ export default function LoginPage() {
     });
 
     if (authError) {
-      setError("Invalid email or password");
+      setError(
+        lang === "en"
+          ? "Invalid email or password"
+          : "អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ"
+      );
       return;
     }
 
@@ -120,12 +130,18 @@ export default function LoginPage() {
 
   return (
     <main style={styles.wrap}>
-      <h1 style={styles.title}>Sign In</h1>
-      <p style={styles.subtitle}>Welcome back to the archive</p>
+      <h1 style={styles.title}>
+        {lang === "en" ? "Sign In" : "ចូលគណនី"}
+      </h1>
+      <p style={styles.subtitle}>
+        {lang === "en"
+          ? "Welcome back to the archive"
+          : "សូមស្វាគមន៍មកកាន់បណ្ណសាររបស់យើងវិញ"}
+      </p>
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
           type="email"
-          placeholder="Email"
+          placeholder={lang === "en" ? "Email" : "អ៊ីមែល"}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -133,7 +149,7 @@ export default function LoginPage() {
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder={lang === "en" ? "Password" : "ពាក្យសម្ងាត់"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -141,11 +157,13 @@ export default function LoginPage() {
         />
         {error && <p style={styles.error}>{error}</p>}
         <button type="submit" style={styles.button}>
-          Sign In
+          {lang === "en" ? "Sign In" : "ចូលគណនី"}
         </button>
       </form>
       <a href="/signup" style={styles.link}>
-        Don&apos;t have an account? Sign up
+        {lang === "en"
+          ? "Don't have an account? Sign up"
+          : "មិនទាន់មានគណនីមែនទេ? ចុះឈ្មោះ"}
       </a>
     </main>
   );
