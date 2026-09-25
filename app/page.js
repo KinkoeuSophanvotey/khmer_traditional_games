@@ -204,7 +204,7 @@ export default function Home() {
           color: colors.deepGreen,
         }}
       >
-        KHMER LIVING ARCHIVE
+        {lang === "en" ? "KHMER LIVING ARCHIVE" : "មរតកល្បែងប្រពៃណីខ្មែរ"}
       </div>
 
       <div
@@ -233,7 +233,7 @@ export default function Home() {
             fontSize: "14px",
           }}
         >
-          {lang === "en" ? "Games" : "ល្បែង"}
+          {lang === "en" ? "Games" : "ល្បែងប្រពៃណីខ្មែរ"}
         </a>
 
         {user ? (
@@ -262,7 +262,7 @@ export default function Home() {
                 fontFamily: "'Courier New', monospace",
               }}
             >
-              Logout
+              {lang === "en" ? "Logout" : "ចាកចេញ"}
             </button>
           </>
         ) : (
@@ -275,7 +275,7 @@ export default function Home() {
                 fontSize: "14px",
               }}
             >
-              Login
+              {lang === "en" ? "Login" : "ចូលគណនី"}
             </a>
 
             <a
@@ -286,7 +286,7 @@ export default function Home() {
                 fontSize: "14px",
               }}
             >
-              Sign up
+              {lang === "en" ? "Sign up" : "បង្កើតគណនី"}
             </a>
           </>
         )}
@@ -359,7 +359,7 @@ export default function Home() {
               fontWeight: 600,
             }}
           >
-            {lang === "en" ? "Explore the Games →" : "ស្វែងរកល្បែង →"}
+            {lang === "en" ? "Explore the Games →" : "ស្វែងរកល្បែងប្រពៃណីខ្មែរ →"}
           </a>
         </div>
 

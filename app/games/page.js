@@ -21,7 +21,7 @@ export default function Games() {
   }, []);
 
   const filteredEntries = entries.filter((entry) => {
-    let search = searchTerm.toLowerCase().trim();
+    let search = searchTerm.toLowerCase().trim().replace(/^"|"$/g, "");
 
     if (
       (search.startsWith('"') && search.endsWith('"')) ||
@@ -102,7 +102,7 @@ export default function Games() {
               letterSpacing: "1px",
             }}
           >
-            KHMER LIVING ARCHIVE
+            {lang === "en" ? "KHMER LIVING ARCHIVE" : "មរតកល្បែងប្រពៃណីខ្មែរ"}
           </div>
 
           <div
@@ -132,7 +132,7 @@ export default function Games() {
                 fontWeight: 700,
               }}
             >
-              {lang === "en" ? "Games" : "ល្បែង"}
+              {lang === "en" ? "Games" : "ល្បែងប្រពៃណីខ្មែរ"}
             </a>
           </div>
         </nav>
