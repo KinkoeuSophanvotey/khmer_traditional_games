@@ -1,24 +1,95 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import entries from "../../../data/entries.js";
+import { createClient } from "../../../lib/supabase/client.js";
 
 export default function GameDetail({ params }) {
   const { slug } = use(params);
   const index = Number(slug);
 
+  const supabase = createClient();
+
   const [lang, setLang] = useState("en");
+  const [entry, setEntry] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") || "en";
     setLang(savedLang);
   }, []);
 
-  const entry = entries[index];
+  useEffect(() => {
+    async function loadEntry() {
+      const { data, error } = await supabase
+        .from("entries")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error loading entry:", error);
+        setEntry(null);
+      } else if (data[index]) {
+        const item = data[index];
+
+        setEntry({
+          title: {
+            en: item.title_en,
+            km: item.title_kh,
+          },
+          description: {
+            en: item.description_en,
+            km: item.description_kh,
+          },
+          howItIsPlayed: {
+            en: item.how_it_is_played_en,
+            km: item.how_it_is_played_kh,
+          },
+          rules: {
+            en: item.rules_en,
+            km: item.rules_kh,
+          },
+          contributor: {
+            en: item.contributor_en,
+            km: item.contributor_kh,
+          },
+          place: {
+            en: item.place_en,
+            km: item.place_kh,
+          },
+        });
+      }
+
+      setLoading(false);
+    }
+
+    loadEntry();
+  }, [index]);
+
+  if (loading) {
+    return (
+      <p
+        style={{
+          maxWidth: 900,
+          margin: "0 auto",
+          padding: "60px 24px",
+          color: "#234F3D",
+        }}
+      >
+        {lang === "en" ? "Loading game..." : "កំពុងផ្ទុកល្បែង..."}
+      </p>
+    );
+  }
 
   if (!entry) {
     return (
-      <p>
+      <p
+        style={{
+          maxWidth: 900,
+          margin: "0 auto",
+          padding: "60px 24px",
+          color: "#234F3D",
+        }}
+      >
         {lang === "en" ? "Game not found." : "រកមិនឃើញល្បែងទេ។"}
       </p>
     );

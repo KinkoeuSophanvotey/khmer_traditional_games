@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import collection from "../../collection.config.js";
 import EntryCard from "../../components/EntryCard";
-import entries from "../../data/entries.js";
+import { createClient } from "../../lib/supabase/client.js";
 
 const colors = {
   deepGreen: "#234F3D",
@@ -12,12 +12,64 @@ const colors = {
 };
 
 export default function Games() {
+  const supabase = createClient();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [lang, setLang] = useState("en");
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") || "en";
     setLang(savedLang);
+  }, []);
+
+  useEffect(() => {
+    async function loadEntries() {
+      const { data, error } = await supabase
+        .from("entries")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error loading entries:", error.message, error.details, error.hint, error.code);
+        setEntries([]);
+      } else {
+        setEntries(
+          data.map((entry) => ({
+            id: entry.id,
+            title: {
+              en: entry.title_en,
+              km: entry.title_kh,
+            },
+            description: {
+              en: entry.description_en,
+              km: entry.description_kh,
+            },
+            howItIsPlayed: {
+              en: entry.how_it_is_played_en,
+              km: entry.how_it_is_played_kh,
+            },
+            rules: {
+              en: entry.rules_en,
+              km: entry.rules_kh,
+            },
+            contributor: {
+              en: entry.contributor_en,
+              km: entry.contributor_kh,
+            },
+            place: {
+              en: entry.place_en,
+              km: entry.place_kh,
+            },
+          }))
+        );
+      }
+
+      setLoading(false);
+    }
+
+    loadEntries();
   }, []);
 
   const filteredEntries = entries.filter((entry) => {
@@ -254,7 +306,22 @@ export default function Games() {
             : `ល្បែង ${filteredEntries.length} នៅក្នុងបណ្ណសារ`}
         </p>
 
-        {filteredEntries.length === 0 ? (
+
+        {loading ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "64px 24px",
+                color: colors.deepGreen,
+              }}
+            >
+              <p style={{ fontSize: "18px" }}>
+                {lang === "en"
+                  ? "Loading games..."
+                  : "កំពុងផ្ទុកល្បែង..."}
+              </p>
+            </div>
+          ) : filteredEntries.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -275,7 +342,7 @@ export default function Games() {
 
               return (
                 <EntryCard
-                  key={originalIndex}
+                  key={entry.id}
                   title={entry.title}
                   description={entry.description}
                   howItIsPlayed={entry.howItIsPlayed}
