@@ -131,8 +131,8 @@ export default function GameDetail({ params }) {
               "/khlaeng-jarb-kon-morn.jpg",
               "/champa-champey.jpg",
               "/Dan-Derm-Sloek-Chhoer.jpg",
-              "/Teanh-Prot.jpg",
-              "/Chol-Chhoung.jpg",
+              "/teanh-prot.jpg",
+              "/chol-chhoung.jpg",
               "/Rorm-Donderm-Kav-Eey.jpg",
               "/Lout-Bav.jpg",
             ][index]
