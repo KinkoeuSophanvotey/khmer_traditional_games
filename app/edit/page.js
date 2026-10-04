@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "../../lib/supabase/client.js";
 
-export default function EditPage() {
+function EditPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -693,5 +693,13 @@ export default function EditPage() {
         </button>
       </form>
     </>
+  );
+}
+
+export default function EditPage() {
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <EditPageContent />
+    </Suspense>
   );
 }
