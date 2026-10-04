@@ -4,8 +4,29 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client.js";
 
+function getOrderIndex(title) {
+  const order = [
+    "Veay K’aom",
+    "Veay K'aom",
+    "Khlaeng Jarb Kon Morn",
+    "Champa Champey",
+    "Dan Derm Sloek Chhoer",
+    "Teanh Prot",
+    "Chol Chhoung",
+    "Rorm Donderm Kav Eey",
+    "Lout Bav",
+  ];
+
+  const index = order.findIndex((name) =>
+    title.toLowerCase().includes(name.toLowerCase())
+  );
+
+  return index === -1 ? 999 : index;
+}
+
 export default function ContributePage() {
   const [user, setUser] = useState(null);
+
   const [formData, setFormData] = useState({
     title_en: "",
     title_kh: "",
@@ -242,20 +263,27 @@ export default function ContributePage() {
 
       const { id } = data;
 
-      // Find the new entry's index
+      // Load all entries using the same data used by the detail page
       const {
         data: entries,
         error: fetchError,
       } = await supabase
         .from("entries")
-        .select("id")
-        .order("created_at", { ascending: false });
+        .select("id, title_en");
 
       if (fetchError) {
         throw fetchError;
       }
 
-      const entryIndex = entries.findIndex(
+      // Use the same ordering logic as /games/[slug]/page.js
+      const sortedEntries = [...entries].sort((a, b) => {
+        return (
+          getOrderIndex(a.title_en) -
+          getOrderIndex(b.title_en)
+        );
+      });
+
+      const entryIndex = sortedEntries.findIndex(
         (entry) => entry.id === id
       );
 
@@ -273,6 +301,7 @@ export default function ContributePage() {
         error?.hint,
         error?.code
       );
+
       alert("An error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
