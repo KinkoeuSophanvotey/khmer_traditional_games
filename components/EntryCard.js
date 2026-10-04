@@ -61,96 +61,60 @@ const styles = {
   },
 };
 
+  function getLegacyPhoto(title) {
+    const titleLower = title.toLowerCase();
+
+    if (titleLower.includes("veay k’aom") || titleLower.includes("veay k'aom")) {
+      return "/Hit-the-Earthen-Pot.jpg";
+    }
+
+    if (titleLower.includes("khlaeng jarb kon morn")) {
+      return "/khlaeng-jarb-kon-morn.jpg";
+    }
+
+    if (titleLower.includes("champa champey")) {
+      return "/champa-champey.jpg";
+    }
+
+    if (titleLower.includes("dan derm sloek chhoer")) {
+      return "/Dan-Derm-Sloek-Chhoer.jpg";
+    }
+
+    if (titleLower.includes("teanh prot")) {
+      return "/teanh-prot.jpg";
+    }
+
+    if (titleLower.includes("chol chhoung")) {
+      return "/chol-chhoung.jpg";
+    }
+
+    if (titleLower.includes("rorm donderm kav eey")) {
+      return "/Rorm-Donderm-Kav-Eey.jpg";
+    }
+
+    if (titleLower.includes("lout bav")) {
+      return "/Lout-Bav.jpg";
+    }
+
+    return null;
+  }
+
 export default function EntryCard({
   title,
   description,
+  photoUrl,
   index,
   lang,
 }) {
+  const imageSrc = photoUrl || getLegacyPhoto(title.en);
+
   return (
     <article style={styles.card}>
       <div style={styles.image}>
-        {index === 0 ? (
+        {imageSrc ? (
           <img
-            src="/Hit-the-Earthen-Pot.jpg"
-            alt="Veay K’aom or Hit the Earthen Pot Game"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
-            }}
-          />
-      ) : index === 1 ? (
-        <img
-          src="/khlaeng-jarb-kon-morn.jpg"
-          alt="Khlaeng Jarb Kon Morn"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            display: "block",
-          }}
-        />
-        ) : index === 2 ? (
-          <img
-            src="/champa-champey.jpg"
-            alt="Champa Champey"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
-            }}
-          />
-        ) : index === 3 ? (
-        <img
-          src="/Dan-Derm-Sloek-Chhoer.jpg"
-          alt="Leaf Grabbing or Dan Derm Sloek Chhoer"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            display: "block",
-          }}
-        />
-        ) : index === 4 ? (
-          <img
-            src="/teanh-prot.jpg"
-            alt="Teanh Prot or Tug of War"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
-            }}
-          />
-        ) : index === 5 ? (
-          <img
-            src="/chol-chhoung.jpg"
-            alt="Chol Chhoung"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
-            }}
-          />
-        ) : index === 6 ? (
-          <img
-            src="/Rorm-Donderm-Kav-Eey.jpg"
-            alt="Dancing to Seize the Chair or Rorm Donderm Kav Eey"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
-            }}
-          />
-        ) : index === 7 ? (
-          <img
-            src="/Lout-Bav.jpg"
-            alt="Lout Bav or Jumping Bag Game"
+            src={imageSrc}
+            alt={title[lang]}
             style={{
               width: "100%",
               height: "100%",

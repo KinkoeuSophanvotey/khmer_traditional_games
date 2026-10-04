@@ -28,15 +28,44 @@ export default function Games() {
     async function loadEntries() {
       const { data, error } = await supabase
         .from("entries")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*");
 
       if (error) {
-        console.error("Error loading entries:", error.message, error.details, error.hint, error.code);
+        console.error(
+          "Error loading entries:",
+          error.message,
+          error.details,
+          error.hint,
+          error.code
+        );
         setEntries([]);
       } else {
+        const order = [
+          "Veay K’aom",
+          "Veay K'aom",
+          "Khlaeng Jarb Kon Morn",
+          "Champa Champey",
+          "Dan Derm Sloek Chhoer",
+          "Teanh Prot",
+          "Chol Chhoung",
+          "Rorm Donderm Kav Eey",
+          "Lout Bav",
+        ];
+
+        const getOrderIndex = (title) => {
+          const index = order.findIndex((name) =>
+            title.toLowerCase().includes(name.toLowerCase())
+          );
+
+          return index === -1 ? 999 : index;
+        };
+
+        const sortedData = [...data].sort((a, b) => {
+          return getOrderIndex(a.title_en) - getOrderIndex(b.title_en);
+        });
+
         setEntries(
-          data.map((entry) => ({
+          sortedData.map((entry) => ({
             id: entry.id,
             title: {
               en: entry.title_en,
@@ -62,6 +91,7 @@ export default function Games() {
               en: entry.place_en,
               km: entry.place_kh,
             },
+            photoUrl: entry.photo_url,
           }))
         );
       }
@@ -306,22 +336,21 @@ export default function Games() {
             : `ល្បែង ${filteredEntries.length} នៅក្នុងបណ្ណសារ`}
         </p>
 
-
         {loading ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "64px 24px",
-                color: colors.deepGreen,
-              }}
-            >
-              <p style={{ fontSize: "18px" }}>
-                {lang === "en"
-                  ? "Loading games..."
-                  : "កំពុងផ្ទុកល្បែង..."}
-              </p>
-            </div>
-          ) : filteredEntries.length === 0 ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "64px 24px",
+              color: colors.deepGreen,
+            }}
+          >
+            <p style={{ fontSize: "18px" }}>
+              {lang === "en"
+                ? "Loading games..."
+                : "កំពុងផ្ទុកល្បែង..."}
+            </p>
+          </div>
+        ) : filteredEntries.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -349,6 +378,7 @@ export default function Games() {
                   rules={entry.rules}
                   contributor={entry.contributor}
                   place={entry.place}
+                  photoUrl={entry.photoUrl}
                   index={originalIndex}
                   lang={lang}
                 />

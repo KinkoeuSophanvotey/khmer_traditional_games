@@ -3,6 +3,67 @@
 import { use, useEffect, useState } from "react";
 import { createClient } from "../../../lib/supabase/client.js";
 
+function getLegacyPhoto(title) {
+  const titleLower = title.toLowerCase();
+
+  if (
+    titleLower.includes("veay k’aom") ||
+    titleLower.includes("veay k'aom")
+  ) {
+    return "/Hit-the-Earthen-Pot.jpg";
+  }
+
+  if (titleLower.includes("khlaeng jarb kon morn")) {
+    return "/khlaeng-jarb-kon-morn.jpg";
+  }
+
+  if (titleLower.includes("champa champey")) {
+    return "/champa-champey.jpg";
+  }
+
+  if (titleLower.includes("dan derm sloek chhoer")) {
+    return "/Dan-Derm-Sloek-Chhoer.jpg";
+  }
+
+  if (titleLower.includes("teanh prot")) {
+    return "/teanh-prot.jpg";
+  }
+
+  if (titleLower.includes("chol chhoung")) {
+    return "/chol-chhoung.jpg";
+  }
+
+  if (titleLower.includes("rorm donderm kav eey")) {
+    return "/Rorm-Donderm-Kav-Eey.jpg";
+  }
+
+  if (titleLower.includes("lout bav")) {
+    return "/Lout-Bav.jpg";
+  }
+
+  return null;
+}
+
+function getOrderIndex(title) {
+  const order = [
+    "Veay K’aom",
+    "Veay K'aom",
+    "Khlaeng Jarb Kon Morn",
+    "Champa Champey",
+    "Dan Derm Sloek Chhoer",
+    "Teanh Prot",
+    "Chol Chhoung",
+    "Rorm Donderm Kav Eey",
+    "Lout Bav",
+  ];
+
+  const index = order.findIndex((name) =>
+    title.toLowerCase().includes(name.toLowerCase())
+  );
+
+  return index === -1 ? 999 : index;
+}
+
 export default function GameDetail({ params }) {
   const { slug } = use(params);
   const index = Number(slug);
@@ -22,41 +83,49 @@ export default function GameDetail({ params }) {
     async function loadEntry() {
       const { data, error } = await supabase
         .from("entries")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*");
 
       if (error) {
         console.error("Error loading entry:", error);
         setEntry(null);
-      } else if (data[index]) {
-        const item = data[index];
-
-        setEntry({
-          title: {
-            en: item.title_en,
-            km: item.title_kh,
-          },
-          description: {
-            en: item.description_en,
-            km: item.description_kh,
-          },
-          howItIsPlayed: {
-            en: item.how_it_is_played_en,
-            km: item.how_it_is_played_kh,
-          },
-          rules: {
-            en: item.rules_en,
-            km: item.rules_kh,
-          },
-          contributor: {
-            en: item.contributor_en,
-            km: item.contributor_kh,
-          },
-          place: {
-            en: item.place_en,
-            km: item.place_kh,
-          },
+      } else {
+        const sortedData = [...data].sort((a, b) => {
+          return getOrderIndex(a.title_en) - getOrderIndex(b.title_en);
         });
+
+        if (sortedData[index]) {
+          const item = sortedData[index];
+
+          setEntry({
+            title: {
+              en: item.title_en,
+              km: item.title_kh,
+            },
+            description: {
+              en: item.description_en,
+              km: item.description_kh,
+            },
+            howItIsPlayed: {
+              en: item.how_it_is_played_en,
+              km: item.how_it_is_played_kh,
+            },
+            rules: {
+              en: item.rules_en,
+              km: item.rules_kh,
+            },
+            contributor: {
+              en: item.contributor_en,
+              km: item.contributor_kh,
+            },
+            place: {
+              en: item.place_en,
+              km: item.place_kh,
+            },
+            photoUrl: item.photo_url,
+          });
+        } else {
+          setEntry(null);
+        }
       }
 
       setLoading(false);
@@ -125,18 +194,7 @@ export default function GameDetail({ params }) {
         }}
       >
         <img
-          src={
-            [
-              "/Hit-the-Earthen-Pot.jpg",
-              "/khlaeng-jarb-kon-morn.jpg",
-              "/champa-champey.jpg",
-              "/Dan-Derm-Sloek-Chhoer.jpg",
-              "/teanh-prot.jpg",
-              "/chol-chhoung.jpg",
-              "/Rorm-Donderm-Kav-Eey.jpg",
-              "/Lout-Bav.jpg",
-            ][index]
-          }
+          src={entry.photoUrl || getLegacyPhoto(entry.title.en)}
           alt={entry.title[lang]}
           style={{
             width: "100%",
