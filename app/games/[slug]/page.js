@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { createClient } from "../../../lib/supabase/client.js";
+import { useRouter } from "next/navigation";
 
 function getLegacyPhoto(title) {
   const titleLower = title.toLowerCase();
@@ -69,14 +70,28 @@ export default function GameDetail({ params }) {
   const index = Number(slug);
 
   const supabase = createClient();
+  const router = useRouter();
 
   const [lang, setLang] = useState("en");
   const [entry, setEntry] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") || "en";
     setLang(savedLang);
+  }, []);
+
+  useEffect(() => {
+    async function loadUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      setUserId(user?.id || null);
+    }
+
+    loadUser();
   }, []);
 
   useEffect(() => {
@@ -97,6 +112,8 @@ export default function GameDetail({ params }) {
           const item = sortedData[index];
 
           setEntry({
+            id: item.id,
+            owner: item.owner,
             title: {
               en: item.title_en,
               km: item.title_kh,
@@ -133,6 +150,41 @@ export default function GameDetail({ params }) {
 
     loadEntry();
   }, [index]);
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this game?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("entries")
+        .delete()
+        .eq("id", entry.id)
+        .select();
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        console.error("Delete returned no row.");
+        alert("That change wasn't saved");
+        return;
+      }
+
+      router.push("/games");
+    } catch (error) {
+      console.error(
+        "Error deleting entry:",
+        error?.message,
+        error?.details,
+        error?.hint,
+        error?.code
+      );
+      alert("An error occurred. Please try again.");
+    }
+  };
 
   if (loading) {
     return (
@@ -238,6 +290,44 @@ export default function GameDetail({ params }) {
           {lang === "en" ? "Place" : "ទីកន្លែង"}
         </h2>
         <p>{entry.place[lang]}</p>
+
+        {userId === entry.owner && (
+          <div
+            style={{
+              marginTop: 32,
+              display: "flex",
+              gap: 12,
+            }}
+          >
+            <a
+              href={`/edit?id=${entry.id}`}
+              style={{
+                padding: "10px 18px",
+                backgroundColor: "#234F3D",
+                color: "#FFFFFF",
+                textDecoration: "none",
+                borderRadius: 8,
+              }}
+            >
+              {lang === "en" ? "Edit" : "កែប្រែ"}
+            </a>
+
+            <button
+              type="button"
+              onClick={handleDelete}
+              style={{
+                padding: "10px 18px",
+                backgroundColor: "#B94A48",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+              }}
+            >
+              {lang === "en" ? "Delete" : "លុប"}
+            </button>
+          </div>
+        )}
       </div>
     </main>
   );
