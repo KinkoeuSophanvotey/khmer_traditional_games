@@ -167,6 +167,7 @@ export default function Home() {
     const savedLang = localStorage.getItem("lang") || "en";
     setLang(savedLang);
   }, []);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
@@ -184,115 +185,129 @@ export default function Home() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
+
   return (
     <main style={styles.wrap}>
-    <nav
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "24px 0",
-        borderBottom: `1px solid ${colors.mutedGold}`,
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "'Courier New', monospace",
-          fontSize: "13px",
-          fontWeight: 700,
-          letterSpacing: "1px",
-          color: colors.deepGreen,
-        }}
-      >
-        {lang === "en" ? "KHMER LIVING ARCHIVE" : "មរតកល្បែងប្រពៃណីខ្មែរ"}
-      </div>
-
-      <div
+      <nav
         style={{
           display: "flex",
-          gap: "28px",
           alignItems: "center",
+          justifyContent: "space-between",
+          padding: "24px 0",
+          borderBottom: `1px solid ${colors.mutedGold}`,
         }}
       >
-        <a
-          href="#home"
+        <div
           style={{
+            fontFamily: "'Courier New', monospace",
+            fontSize: "13px",
+            fontWeight: 700,
+            letterSpacing: "1px",
             color: colors.deepGreen,
-            textDecoration: "none",
-            fontSize: "14px",
-          }}
-               >
-          {lang === "en" ? "Home" : "ទំព័រដើម"}
-        </a>
-
-        <a
-          href="/games"
-          style={{
-            color: colors.deepGreen,
-            textDecoration: "none",
-            fontSize: "14px",
           }}
         >
-          {lang === "en" ? "Games" : "ល្បែងប្រពៃណីខ្មែរ"}
-        </a>
+          {lang === "en" ? "KHMER LIVING ARCHIVE" : "មរតកល្បែងប្រពៃណីខ្មែរ"}
+        </div>
 
-        {user ? (
-          <>
-            <span
-              style={{
-                color: colors.deepGreen,
-                fontSize: "14px",
-                fontFamily: "'Courier New', monospace",
-              }}
-            >
-              {user.email}
-            </span>
+        <div
+          style={{
+            display: "flex",
+            gap: "28px",
+            alignItems: "center",
+          }}
+        >
+          <a
+            href="#home"
+            style={{
+              color: colors.deepGreen,
+              textDecoration: "none",
+              fontSize: "14px",
+            }}
+          >
+            {lang === "en" ? "Home" : "ទំព័រដើម"}
+          </a>
 
-            <button
-              onClick={handleLogout}
-              style={{
-                background: "none",
-                border: `1px solid ${colors.mutedGold}`,
-                borderRadius: "999px",
-                padding: "8px 16px",
-                color: colors.deepGreen,
-                fontSize: "13px",
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: "'Courier New', monospace",
-              }}
-            >
-              {lang === "en" ? "Logout" : "ចាកចេញ"}
-            </button>
-          </>
-        ) : (
-          <>
-            <a
-              href="/login"
-              style={{
-                color: colors.deepGreen,
-                textDecoration: "none",
-                fontSize: "14px",
-              }}
-            >
-              {lang === "en" ? "Login" : "ចូលគណនី"}
-            </a>
+          <a
+            href="/games"
+            style={{
+              color: colors.deepGreen,
+              textDecoration: "none",
+              fontSize: "14px",
+            }}
+          >
+            {lang === "en" ? "Games" : "ល្បែងប្រពៃណីខ្មែរ"}
+          </a>
 
-            <a
-              href="/signup"
-              style={{
-                color: colors.deepGreen,
-                textDecoration: "none",
-                fontSize: "14px",
-              }}
-            >
-              {lang === "en" ? "Sign up" : "បង្កើតគណនី"}
-            </a>
-          </>
-        )}
+          {user ? (
+            <>
+              <a
+                href="/contribute"
+                style={{
+                  color: colors.deepGreen,
+                  textDecoration: "none",
+                  fontSize: "14px",
+                }}
+              >
+                {lang === "en"
+                  ? "Contribute"
+                  : "ចូលរួមចែករំលែក"}
+              </a>
 
-      </div>
-    </nav>
+              <span
+                style={{
+                  color: colors.deepGreen,
+                  fontSize: "14px",
+                  fontFamily: "'Courier New', monospace",
+                }}
+              >
+                {user.email}
+              </span>
+
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: "none",
+                  border: `1px solid ${colors.mutedGold}`,
+                  borderRadius: "999px",
+                  padding: "8px 16px",
+                  color: colors.deepGreen,
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "'Courier New', monospace",
+                }}
+              >
+                {lang === "en" ? "Logout" : "ចាកចេញ"}
+              </button>
+            </>
+          ) : (
+            <>
+              <a
+                href="/login"
+                style={{
+                  color: colors.deepGreen,
+                  textDecoration: "none",
+                  fontSize: "14px",
+                }}
+              >
+                {lang === "en" ? "Login" : "ចូលគណនី"}
+              </a>
+
+              <a
+                href="/signup"
+                style={{
+                  color: colors.deepGreen,
+                  textDecoration: "none",
+                  fontSize: "14px",
+                }}
+              >
+                {lang === "en" ? "Sign up" : "បង្កើតគណនី"}
+              </a>
+            </>
+          )}
+        </div>
+      </nav>
+
       <section
         id="home"
         style={{
@@ -359,97 +374,123 @@ export default function Home() {
               fontWeight: 600,
             }}
           >
-            {lang === "en" ? "Explore the Games →" : "ស្វែងរកល្បែងប្រពៃណីខ្មែរ →"}
+            {lang === "en"
+              ? "Explore the Games →"
+              : "ស្វែងរកល្បែងប្រពៃណីខ្មែរ →"}
+          </a>
+
+          <a
+            href="/signup"
+            style={{
+              display: "inline-block",
+              marginLeft: "12px",
+              padding: "12px 20px",
+              border: `1px solid ${colors.deepGreen}`,
+              borderRadius: "999px",
+              color: colors.deepGreen,
+              textDecoration: "none",
+              fontSize: "14px",
+              fontWeight: 600,
+            }}
+          >
+            {lang === "en"
+              ? "Join as a Contributor"
+              : "ចូលរួមជាអ្នកចែករំលែក"}
           </a>
         </div>
 
         <div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: "12px",
-          }}
-        >
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            padding: "3px",
-            border: "1px solid #B89452",
-            borderRadius: "999px",
-            backgroundColor: "#F3EBDD",
-          }}
-        >
-          <button
-            onClick={() => {
-              setLang("en");
-              localStorage.setItem("lang", "en");
-            }}
+          <div
             style={{
-              padding: "7px 13px",
-              border: "none",
-              borderRadius: "999px",
-              backgroundColor: lang === "en" ? "#234F3D" : "transparent",
-              color: lang === "en" ? "#F3EBDD" : "#234F3D",
-              fontSize: "13px",
-              fontWeight: 600,
-              cursor: "pointer",
+              display: "flex",
+              justifyContent: "flex-end",
+              marginBottom: "12px",
             }}
           >
-            English
-          </button>
-
-          <button
-            onClick={() => {
-              setLang("km");
-              localStorage.setItem("lang", "km");
-            }}
-            style={{
-              padding: "7px 13px",
-              border: "none",
-              borderRadius: "999px",
-              backgroundColor: lang === "km" ? "#234F3D" : "transparent",
-              color: lang === "km" ? "#F3EBDD" : "#234F3D",
-              fontSize: "13px",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            ខ្មែរ
-          </button>
-        </div>
-        </div>
-        <img
-          src="/khmer-tradition.jpg"
-          alt="Khmer traditional game"
-          style={{
-            width: "100%",
-            aspectRatio: "4 / 3",
-            objectFit: "cover",
-            borderRadius: "16px",
-            display: "block",
-          }}
-        />
-      </div>
-      </section>
-      <div
-             style={{
-              marginTop: "24px",
-              padding: "8px 0",
-              color: colors.deepGreen,
-              lineHeight: 1.5,
-              textAlign: "center",
-            }}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "3px",
+                border: "1px solid #B89452",
+                borderRadius: "999px",
+                backgroundColor: "#F3EBDD",
+              }}
             >
-            <p style={{ margin: "0 0 8px" }}>
-              <strong>Curated by:</strong> {collection.curator}
-            </p>
+              <button
+                onClick={() => {
+                  setLang("en");
+                  localStorage.setItem("lang", "en");
+                }}
+                style={{
+                  padding: "7px 13px",
+                  border: "none",
+                  borderRadius: "999px",
+                  backgroundColor:
+                    lang === "en" ? "#234F3D" : "transparent",
+                  color: lang === "en" ? "#F3EBDD" : "#234F3D",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                English
+              </button>
 
-            <p style={{ margin: 0 }}>
-              <strong>Source:</strong> {collection.source}
-            </p>
+              <button
+                onClick={() => {
+                  setLang("km");
+                  localStorage.setItem("lang", "km");
+                }}
+                style={{
+                  padding: "7px 13px",
+                  border: "none",
+                  borderRadius: "999px",
+                  backgroundColor:
+                    lang === "km" ? "#234F3D" : "transparent",
+                  color: lang === "km" ? "#F3EBDD" : "#234F3D",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                ខ្មែរ
+              </button>
             </div>
+          </div>
+
+          <img
+            src="/khmer-tradition.jpg"
+            alt="Khmer traditional game"
+            style={{
+              width: "100%",
+              aspectRatio: "4 / 3",
+              objectFit: "cover",
+              borderRadius: "16px",
+              display: "block",
+            }}
+          />
+        </div>
+      </section>
+
+      <div
+        style={{
+          marginTop: "24px",
+          padding: "8px 0",
+          color: colors.deepGreen,
+          lineHeight: 1.5,
+          textAlign: "center",
+        }}
+      >
+        <p style={{ margin: "0 0 8px" }}>
+          <strong>Curated by:</strong> {collection.curator}
+        </p>
+
+        <p style={{ margin: 0 }}>
+          <strong>Source:</strong> {collection.source}
+        </p>
+      </div>
+
       <footer
         style={{
           marginTop: "24px",
@@ -463,7 +504,7 @@ export default function Home() {
         Built in ICT 340 — Vibe Coding, American University of Phnom Penh, Fall
         2026. This archive is under construction all semester. Come back in
         December.
-      </footer>  
+      </footer>
     </main>
   );
 }
