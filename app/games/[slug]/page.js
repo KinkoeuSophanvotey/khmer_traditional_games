@@ -98,7 +98,8 @@ export default function GameDetail({ params }) {
     async function loadEntry() {
       const { data, error } = await supabase
         .from("entries")
-        .select("*");
+        .select("*")
+        .eq("status", "published");
 
       if (error) {
         console.error("Error loading entry:", error);

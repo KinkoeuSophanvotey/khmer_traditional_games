@@ -260,25 +260,44 @@ function EditPageContent() {
         photoUrl = publicUrl;
       }
 
+      // Check if user is a reviewer by calling the RPC function
+      let isReviewer = false;
+      try {
+        const { data: isReviewerData, error: reviewerError } = await supabase.rpc(
+          "is_reviewer"
+        );
+        if (!reviewerError && isReviewerData !== null) {
+          isReviewer = !!isReviewerData;
+        }
+      } catch (error) {
+        // If the RPC function doesn't exist or fails, assume not a reviewer
+        console.error("Error checking reviewer status:", error);
+      }
+
+      const updatePayload = {
+        title_en: formData.title_en.trim(),
+        title_kh: formData.title_kh.trim(),
+        description_en: formData.description_en.trim(),
+        description_kh: formData.description_kh.trim(),
+        how_it_is_played_en: formData.how_it_is_played_en.trim(),
+        how_it_is_played_kh: formData.how_it_is_played_kh.trim(),
+        rules_en: formData.rules_en.trim(),
+        rules_kh: formData.rules_kh.trim(),
+        contributor_en: formData.contributor_en.trim(),
+        contributor_kh: formData.contributor_kh.trim(),
+        place_en: formData.place_en.trim(),
+        place_kh: formData.place_kh.trim(),
+        photo_url: photoUrl,
+      };
+
+      // Only set status to 'pending' for normal owners, not reviewers
+      if (!isReviewer) {
+        updatePayload.status = "pending";
+      }
+
       const { data, error: updateError } = await supabase
         .from("entries")
-        .update({
-          title_en: formData.title_en.trim(),
-          title_kh: formData.title_kh.trim(),
-          description_en: formData.description_en.trim(),
-          description_kh: formData.description_kh.trim(),
-          how_it_is_played_en:
-            formData.how_it_is_played_en.trim(),
-          how_it_is_played_kh:
-            formData.how_it_is_played_kh.trim(),
-          rules_en: formData.rules_en.trim(),
-          rules_kh: formData.rules_kh.trim(),
-          contributor_en: formData.contributor_en.trim(),
-          contributor_kh: formData.contributor_kh.trim(),
-          place_en: formData.place_en.trim(),
-          place_kh: formData.place_kh.trim(),
-          photo_url: photoUrl,
-        })
+        .update(updatePayload)
         .eq("id", entryId)
         .select();
 

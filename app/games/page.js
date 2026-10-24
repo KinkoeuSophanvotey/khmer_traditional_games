@@ -28,7 +28,8 @@ export default function Games() {
     async function loadEntries() {
       const { data, error } = await supabase
         .from("entries")
-        .select("*");
+        .select("*")
+        .eq("status", "published");
 
       if (error) {
         console.error(

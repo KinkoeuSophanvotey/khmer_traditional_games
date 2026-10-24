@@ -23,19 +23,26 @@ const styles = {
 };
 
 export default function Home() {
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
   const [lang, setLang] = useState("en");
   const [user, setUser] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isReviewer, setIsReviewer] = useState(false);
 
+  // Load the saved language.
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") || "en";
     setLang(savedLang);
   }, []);
 
+  // Check the signed-in user and listen for login/logout changes.
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
+    let active = true;
+
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (active) {
+        setUser(error ? null : data.user);
+      }
     });
 
     const {
@@ -45,8 +52,35 @@ export default function Home() {
       setProfileOpen(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  // Show the Review link only if Supabase confirms reviewer permission.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkReviewer() {
+      if (!user) {
+        setIsReviewer(false);
+        return;
+      }
+
+      const { data, error } = await supabase.rpc("is_reviewer");
+
+      if (!cancelled) {
+        setIsReviewer(!error && data === true);
+      }
+    }
+
+    checkReviewer();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, supabase]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -104,6 +138,16 @@ export default function Home() {
                 {lang === "en" ? "Contribute" : "ចូលរួមចែករំលែក"}
               </a>
 
+              <a href="/my-entries" style={navLink}>
+                {lang === "en" ? "My Entries" : "ជាធាតុរបស់ខ្ញុំ"}
+              </a>
+
+              {isReviewer && (
+                <a href="/review" style={navLink}>
+                  Review
+                </a>
+              )}
+
               <div style={{ position: "relative" }}>
                 <button
                   type="button"
@@ -138,6 +182,7 @@ export default function Home() {
                   >
                     {username.charAt(0).toUpperCase()}
                   </span>
+
                   <span>{username}</span>
                   <span>{profileOpen ? "▲" : "▼"}</span>
                 </button>
@@ -167,7 +212,9 @@ export default function Home() {
                         color: colors.deepGreen,
                       }}
                     >
-                      {lang === "en" ? "Account Details" : "ព័ត៌មានគណនី"}
+                      {lang === "en"
+                        ? "Account Details"
+                        : "ព័ត៌មានគណនី"}
                     </p>
 
                     <p
@@ -179,6 +226,7 @@ export default function Home() {
                     >
                       {lang === "en" ? "Username" : "ឈ្មោះអ្នកប្រើ"}
                     </p>
+
                     <p
                       style={{
                         margin: "0 0 14px",
@@ -198,6 +246,7 @@ export default function Home() {
                     >
                       Email
                     </p>
+
                     <p
                       style={{
                         margin: "0 0 18px",
@@ -234,6 +283,7 @@ export default function Home() {
               <a href="/login" style={navLink}>
                 {lang === "en" ? "Login" : "ចូលគណនី"}
               </a>
+
               <a href="/signup" style={navLink}>
                 {lang === "en" ? "Sign up" : "បង្កើតគណនី"}
               </a>
@@ -377,6 +427,7 @@ export default function Home() {
         <p style={{ margin: "0 0 8px" }}>
           <strong>Curated by:</strong> {collection.curator}
         </p>
+
         <p style={{ margin: 0 }}>
           <strong>Source:</strong> {collection.source}
         </p>
