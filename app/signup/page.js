@@ -95,8 +95,10 @@ const styles = {
 
 export default function SignupPage() {
   const router = useRouter();
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [lang, setLang] = useState("en");
@@ -116,6 +118,11 @@ export default function SignupPage() {
     const { error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          username: username.trim(),
+        },
+      },
     });
 
     if (authError) {
@@ -144,6 +151,14 @@ export default function SignupPage() {
         <>
           <form onSubmit={handleSubmit} style={styles.form}>
             <input
+              type="text"
+              placeholder={lang === "en" ? "Username" : "ឈ្មោះអ្នកប្រើ"}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              style={styles.input}
+            />
+            <input
               type="email"
               placeholder={lang === "en" ? "Email" : "អ៊ីមែល"}
               value={email}
@@ -151,14 +166,35 @@ export default function SignupPage() {
               required
               style={styles.input}
             />
-            <input
-              type="password"
-              placeholder={lang === "en" ? "Password" : "ពាក្យសម្ងាត់"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={styles.input}
-            />
+            <div style={{ position: "relative", width: "100%" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder={lang === "en" ? "Password" : "ពាក្យសម្ងាត់"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{ ...styles.input, paddingRight: "54px" }}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  border: "none",
+                  background: "transparent",
+                  color: colors.deepGreen,
+                  cursor: "pointer",
+                  fontSize: "18px",
+                }}
+              >
+                {showPassword ? "◉" : "⊘"}
+              </button>
+            </div>
             {error && <p style={styles.error}>{error}</p>}
             <button type="submit" style={styles.button}>
               {lang === "en" ? "Sign Up" : "ចុះឈ្មោះ"}

@@ -20,148 +20,13 @@ const styles = {
     minHeight: "100vh",
     boxSizing: "border-box",
   },
-  hero: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "48px",
-    alignItems: "center",
-    padding: "96px 0 72px",
-    borderBottom: `1px solid ${colors.mutedGold}`,
-  },
-  heroTitle: {
-    fontSize: 64,
-    fontWeight: 700,
-    color: colors.deepGreen,
-    margin: "0 0 24px",
-    lineHeight: 1.05,
-    letterSpacing: -1,
-  },
-  heroDescription: {
-    fontSize: 19,
-    color: colors.mutedGold,
-    lineHeight: 1.7,
-    margin: "0 0 32px",
-  },
-  heroImageArea: {
-    aspectRatio: "4/3",
-    backgroundColor: colors.deepGreen,
-    border: `2px dashed ${colors.mutedGold}`,
-    borderRadius: 16,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: colors.warmBeige,
-    fontFamily: "'Courier New', monospace",
-    fontSize: 14,
-    letterSpacing: 1,
-  },
-  exploreButton: {
-    display: "inline-block",
-    padding: "16px 32px",
-    backgroundColor: colors.deepGreen,
-    color: colors.warmBeige,
-    border: "none",
-    borderRadius: 8,
-    fontSize: 16,
-    fontWeight: 600,
-    cursor: "pointer",
-    textDecoration: "none",
-    fontFamily: "'Courier New', monospace",
-  },
-  section: {
-    padding: "64px 0",
-  },
-  sectionTitle: {
-    fontSize: 36,
-    fontWeight: 700,
-    color: colors.deepGreen,
-    margin: "0 0 16px",
-    lineHeight: 1.2,
-  },
-  aboutText: {
-    fontSize: 16,
-    color: colors.mutedGold,
-    lineHeight: 1.7,
-    margin: 0,
-  },
-  exploreBar: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    gap: "16px",
-    marginBottom: "24px",
-    paddingBottom: "24px",
-    borderBottom: `1px solid ${colors.mutedGold}`,
-  },
-  langToggle: {
-    padding: "10px 20px",
-    backgroundColor: colors.deepGreen,
-    color: colors.warmBeige,
-    border: "none",
-    borderRadius: "999px",
-    fontSize: "14px",
-    fontWeight: 600,
-    cursor: "pointer",
-    fontFamily: "'Courier New', monospace",
-  },
-  searchInput: {
-    width: "100%",
-    boxSizing: "border-box",
-    margin: "16px 0",
-    padding: "14px 18px",
-    paddingRight: "44px",
-    backgroundColor: colors.warmBeige,
-    border: `1px solid ${colors.mutedGold}`,
-    borderRadius: 10,
-    color: colors.deepGreen,
-    fontSize: "16px",
-    fontFamily: "inherit",
-  },
-  clearButton: {
-    position: "absolute",
-    right: "14px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    background: "none",
-    border: "none",
-    color: colors.mutedGold,
-    fontSize: "20px",
-    cursor: "pointer",
-    padding: "4px",
-    lineHeight: 1,
-  },
-  entryList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "24px",
-  },
-  count: {
-    fontFamily: "'Courier New', monospace",
-    fontSize: 14,
-    color: colors.mutedGold,
-    marginTop: 48,
-    textAlign: "center",
-  },
-  footer: {
-    marginTop: 80,
-    paddingTop: 32,
-    borderTop: `1px solid ${colors.mutedGold}`,
-    fontSize: 13,
-    color: colors.mutedGold,
-    textAlign: "center",
-  },
-  noResults: {
-    textAlign: "center",
-    padding: "60px 24px",
-    color: colors.mutedGold,
-  },
 };
 
 export default function Home() {
   const supabase = createClient();
   const [lang, setLang] = useState("en");
   const [user, setUser] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") || "en";
@@ -177,6 +42,7 @@ export default function Home() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setProfileOpen(false);
     });
 
     return () => subscription.unsubscribe();
@@ -184,7 +50,10 @@ export default function Home() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setProfileOpen(false);
   };
+
+  const username = user?.user_metadata?.username || "User";
 
   return (
     <main style={styles.wrap}>
@@ -193,6 +62,8 @@ export default function Home() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "16px",
           padding: "24px 0",
           borderBottom: `1px solid ${colors.mutedGold}`,
         }}
@@ -206,101 +77,164 @@ export default function Home() {
             color: colors.deepGreen,
           }}
         >
-          {lang === "en" ? "KHMER LIVING ARCHIVE" : "មរតកល្បែងប្រពៃណីខ្មែរ"}
+          {lang === "en"
+            ? "KHMER LIVING ARCHIVE"
+            : "មរតកល្បែងប្រពៃណីខ្មែរ"}
         </div>
 
         <div
           style={{
             display: "flex",
-            gap: "28px",
+            gap: "20px",
             alignItems: "center",
+            flexWrap: "wrap",
           }}
         >
-          <a
-            href="#home"
-            style={{
-              color: colors.deepGreen,
-              textDecoration: "none",
-              fontSize: "14px",
-            }}
-          >
+          <a href="#home" style={navLink}>
             {lang === "en" ? "Home" : "ទំព័រដើម"}
           </a>
 
-          <a
-            href="/games"
-            style={{
-              color: colors.deepGreen,
-              textDecoration: "none",
-              fontSize: "14px",
-            }}
-          >
+          <a href="/games" style={navLink}>
             {lang === "en" ? "Games" : "ល្បែងប្រពៃណីខ្មែរ"}
           </a>
 
           {user ? (
             <>
-              <a
-                href="/contribute"
-                style={{
-                  color: colors.deepGreen,
-                  textDecoration: "none",
-                  fontSize: "14px",
-                }}
-              >
-                {lang === "en"
-                  ? "Contribute"
-                  : "ចូលរួមចែករំលែក"}
+              <a href="/contribute" style={navLink}>
+                {lang === "en" ? "Contribute" : "ចូលរួមចែករំលែក"}
               </a>
 
-              <span
-                style={{
-                  color: colors.deepGreen,
-                  fontSize: "14px",
-                  fontFamily: "'Courier New', monospace",
-                }}
-              >
-                {user.email}
-              </span>
+              <div style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  aria-label="Open account details"
+                  aria-expanded={profileOpen}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    border: "none",
+                    background: "transparent",
+                    color: colors.deepGreen,
+                    cursor: "pointer",
+                    fontFamily: "'Courier New', monospace",
+                    fontSize: "14px",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "50%",
+                      backgroundColor: colors.deepGreen,
+                      color: colors.warmBeige,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "18px",
+                      border: `2px solid ${colors.mutedGold}`,
+                    }}
+                  >
+                    {username.charAt(0).toUpperCase()}
+                  </span>
+                  <span>{username}</span>
+                  <span>{profileOpen ? "▲" : "▼"}</span>
+                </button>
 
-              <button
-                onClick={handleLogout}
-                style={{
-                  background: "none",
-                  border: `1px solid ${colors.mutedGold}`,
-                  borderRadius: "999px",
-                  padding: "8px 16px",
-                  color: colors.deepGreen,
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  fontFamily: "'Courier New', monospace",
-                }}
-              >
-                {lang === "en" ? "Logout" : "ចាកចេញ"}
-              </button>
+                {profileOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "48px",
+                      right: 0,
+                      width: "260px",
+                      maxWidth: "calc(100vw - 48px)",
+                      padding: "18px",
+                      backgroundColor: colors.warmBeige,
+                      border: `1px solid ${colors.mutedGold}`,
+                      borderRadius: "12px",
+                      boxShadow: "0 6px 20px rgba(0,0,0,0.12)",
+                      zIndex: 10,
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: "0 0 16px",
+                        fontSize: "16px",
+                        fontWeight: 700,
+                        color: colors.deepGreen,
+                      }}
+                    >
+                      {lang === "en" ? "Account Details" : "ព័ត៌មានគណនី"}
+                    </p>
+
+                    <p
+                      style={{
+                        margin: "0 0 6px",
+                        color: colors.mutedGold,
+                        fontSize: "12px",
+                      }}
+                    >
+                      {lang === "en" ? "Username" : "ឈ្មោះអ្នកប្រើ"}
+                    </p>
+                    <p
+                      style={{
+                        margin: "0 0 14px",
+                        color: colors.deepGreen,
+                        fontSize: "14px",
+                      }}
+                    >
+                      {user.user_metadata?.username || "Not set"}
+                    </p>
+
+                    <p
+                      style={{
+                        margin: "0 0 6px",
+                        color: colors.mutedGold,
+                        fontSize: "12px",
+                      }}
+                    >
+                      Email
+                    </p>
+                    <p
+                      style={{
+                        margin: "0 0 18px",
+                        color: colors.deepGreen,
+                        fontSize: "14px",
+                      }}
+                    >
+                      {user.email}
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        backgroundColor: colors.deepGreen,
+                        color: colors.warmBeige,
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {lang === "en" ? "Logout" : "ចាកចេញ"}
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <>
-              <a
-                href="/login"
-                style={{
-                  color: colors.deepGreen,
-                  textDecoration: "none",
-                  fontSize: "14px",
-                }}
-              >
+              <a href="/login" style={navLink}>
                 {lang === "en" ? "Login" : "ចូលគណនី"}
               </a>
-
-              <a
-                href="/signup"
-                style={{
-                  color: colors.deepGreen,
-                  textDecoration: "none",
-                  fontSize: "14px",
-                }}
-              >
+              <a href="/signup" style={navLink}>
                 {lang === "en" ? "Sign up" : "បង្កើតគណនី"}
               </a>
             </>
@@ -312,7 +246,7 @@ export default function Home() {
         id="home"
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
           gap: "56px",
           alignItems: "center",
           padding: "80px 0",
@@ -361,19 +295,7 @@ export default function Home() {
               : "ស្វែងយល់អំពីល្បែងប្រពៃណីខ្មែរដែលបានបន្តពីជំនាន់មួយទៅជំនាន់មួយ រួមទាំងរបៀបលេង និងរឿងរ៉ាវនៅពីក្រោយល្បែងទាំងនោះ។"}
           </p>
 
-          <a
-            href="/games"
-            style={{
-              display: "inline-block",
-              padding: "12px 20px",
-              border: `1px solid ${colors.deepGreen}`,
-              borderRadius: "999px",
-              color: colors.deepGreen,
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: 600,
-            }}
-          >
+          <a href="/games" style={pillLink}>
             {lang === "en"
               ? "Explore the Games →"
               : "ស្វែងរកល្បែងប្រពៃណីខ្មែរ →"}
@@ -381,17 +303,7 @@ export default function Home() {
 
           <a
             href="/signup"
-            style={{
-              display: "inline-block",
-              marginLeft: "12px",
-              padding: "12px 20px",
-              border: `1px solid ${colors.deepGreen}`,
-              borderRadius: "999px",
-              color: colors.deepGreen,
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: 600,
-            }}
+            style={{ ...pillLink, marginLeft: "12px" }}
           >
             {lang === "en"
               ? "Join as a Contributor"
@@ -412,9 +324,9 @@ export default function Home() {
                 display: "inline-flex",
                 alignItems: "center",
                 padding: "3px",
-                border: "1px solid #B89452",
+                border: `1px solid ${colors.mutedGold}`,
                 borderRadius: "999px",
-                backgroundColor: "#F3EBDD",
+                backgroundColor: colors.warmBeige,
               }}
             >
               <button
@@ -422,17 +334,7 @@ export default function Home() {
                   setLang("en");
                   localStorage.setItem("lang", "en");
                 }}
-                style={{
-                  padding: "7px 13px",
-                  border: "none",
-                  borderRadius: "999px",
-                  backgroundColor:
-                    lang === "en" ? "#234F3D" : "transparent",
-                  color: lang === "en" ? "#F3EBDD" : "#234F3D",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
+                style={languageButton(lang === "en")}
               >
                 English
               </button>
@@ -442,17 +344,7 @@ export default function Home() {
                   setLang("km");
                   localStorage.setItem("lang", "km");
                 }}
-                style={{
-                  padding: "7px 13px",
-                  border: "none",
-                  borderRadius: "999px",
-                  backgroundColor:
-                    lang === "km" ? "#234F3D" : "transparent",
-                  color: lang === "km" ? "#F3EBDD" : "#234F3D",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
+                style={languageButton(lang === "km")}
               >
                 ខ្មែរ
               </button>
@@ -485,7 +377,6 @@ export default function Home() {
         <p style={{ margin: "0 0 8px" }}>
           <strong>Curated by:</strong> {collection.curator}
         </p>
-
         <p style={{ margin: 0 }}>
           <strong>Source:</strong> {collection.source}
         </p>
@@ -507,4 +398,34 @@ export default function Home() {
       </footer>
     </main>
   );
+}
+
+const navLink = {
+  color: colors.deepGreen,
+  textDecoration: "none",
+  fontSize: "14px",
+};
+
+const pillLink = {
+  display: "inline-block",
+  padding: "12px 20px",
+  border: `1px solid ${colors.deepGreen}`,
+  borderRadius: "999px",
+  color: colors.deepGreen,
+  textDecoration: "none",
+  fontSize: "14px",
+  fontWeight: 600,
+};
+
+function languageButton(isActive) {
+  return {
+    padding: "7px 13px",
+    border: "none",
+    borderRadius: "999px",
+    backgroundColor: isActive ? colors.deepGreen : "transparent",
+    color: isActive ? colors.warmBeige : colors.deepGreen,
+    fontSize: "13px",
+    fontWeight: 600,
+    cursor: "pointer",
+  };
 }
