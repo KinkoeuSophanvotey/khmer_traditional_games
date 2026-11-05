@@ -144,7 +144,7 @@ export default function Home() {
 
               {isReviewer && (
                 <a href="/review" style={navLink}>
-                  Review
+                {lang === "en" ? "Review" : "ពិនិត្យ"}
                 </a>
               )}
 

@@ -461,43 +461,60 @@ function EditPageContent() {
       `}</style>
 
       <form onSubmit={handleSubmit} className="edit-form">
-        <h1>Edit Game</h1>
+      <button
+        type="button"
+        onClick={() => router.push("/my-entries")}
+        style={{
+          marginBottom: "20px",
+          marginLeft: "0",
+          padding: "0",
+          backgroundColor: "transparent",
+          color: "#234F3D",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "14px",
+        }}
+      >
+        ← Cancel / Back to My Entries
+      </button>
 
-        <div className="language-pair">
-          <div className="form-field">
-            <label htmlFor="title_en">
-              Title (English):
-            </label>
-            <input
-              id="title_en"
-              type="text"
-              name="title_en"
-              value={formData.title_en}
-              onChange={handleChange}
-              disabled={isSubmitting}
-            />
-            {errors.title_en && (
-              <div className="error">{errors.title_en}</div>
-            )}
-          </div>
+      <h1 style={{ marginLeft: "0" }}>Edit Game</h1>
 
-          <div className="form-field">
-            <label htmlFor="title_kh">
-              Title (Khmer):
-            </label>
-            <input
-              id="title_kh"
-              type="text"
-              name="title_kh"
-              value={formData.title_kh}
-              onChange={handleChange}
-              disabled={isSubmitting}
-            />
-            {errors.title_kh && (
-              <div className="error">{errors.title_kh}</div>
-            )}
-          </div>
+      <div className="language-pair">
+        <div className="form-field">
+          <label htmlFor="title_en">
+            Title (English):
+          </label>
+          <input
+            id="title_en"
+            type="text"
+            name="title_en"
+            value={formData.title_en}
+            onChange={handleChange}
+            disabled={isSubmitting}
+          />
+          {errors.title_en && (
+            <div className="error">{errors.title_en}</div>
+          )}
         </div>
+
+        <div className="form-field">
+          <label htmlFor="title_kh">
+            Title (Khmer):
+          </label>
+          <input
+            id="title_kh"
+            type="text"
+            name="title_kh"
+            value={formData.title_kh}
+            onChange={handleChange}
+            disabled={isSubmitting}
+          />
+          {errors.title_kh && (
+            <div className="error">{errors.title_kh}</div>
+          )}
+        </div>
+      </div>
 
         <div className="language-pair">
           <div className="form-field">

@@ -8,6 +8,8 @@ import { createClient } from "../../lib/supabase/client.js";
 
 export default function ContributePage() {
   const [user, setUser] = useState(null);
+  const [isCheckingUser, setIsCheckingUser] = useState(true);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     title_en: "",
@@ -28,23 +30,32 @@ export default function ContributePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-
   const supabase = createClient();
 
   useEffect(() => {
     let active = true;
 
-    supabase.auth.getUser().then(({ data, error }) => {
-      if (!active) return;
+    async function checkUser() {
+      try {
+        const { data, error } = await supabase.auth.getUser();
 
-      if (error) {
-        console.error("Error checking user:", error.message);
-        setUser(null);
-        return;
+        if (!active) return;
+
+        if (error) {
+          console.error("Error checking user:", error.message);
+          setUser(null);
+        } else {
+          setUser(data.user);
+        }
+      } catch (error) {
+        console.error("Login check failed:", error);
+        if (active) setUser(null);
+      } finally {
+        if (active) setIsCheckingUser(false);
       }
+    }
 
-      setUser(data.user);
-    });
+    checkUser();
 
     return () => {
       active = false;
@@ -189,9 +200,7 @@ export default function ContributePage() {
       return;
     }
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
 
@@ -199,21 +208,19 @@ export default function ContributePage() {
       const fileExtension = photoFile.name.split(".").pop().toLowerCase();
       const photoPath = `${user.id}/${crypto.randomUUID()}.${fileExtension}`;
 
-      // Upload the photo.
+
       const { error: uploadError } = await supabase.storage
         .from("photos")
         .upload(photoPath, photoFile);
 
-      if (uploadError) {
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
-      // Get the public URL for the uploaded photo.
+
+
       const {
         data: { publicUrl },
       } = supabase.storage.from("photos").getPublicUrl(photoPath);
 
-      // Insert the entry. Supabase sets status to "pending" by default.
       const { error: insertError } = await supabase.from("entries").insert({
         title_en: formData.title_en.trim(),
         title_kh: formData.title_kh.trim(),
@@ -231,15 +238,8 @@ export default function ContributePage() {
         photo_url: publicUrl,
       });
 
-      if (insertError) {
-        throw insertError;
-      }
+      if (insertError) throw insertError;
 
-      alert(
-        "Thank you for contributing to the Khmer Living Archive! Your entry has been submitted and is waiting for review. You can check its status on My Entries."
-      );
-
-      // Clear the form after successful submission.
       setFormData({
         title_en: "",
         title_kh: "",
@@ -259,9 +259,9 @@ export default function ContributePage() {
       setErrors({});
 
       const photoInput = document.getElementById("photo");
-      if (photoInput) {
-        photoInput.value = "";
-      }
+      if (photoInput) photoInput.value = "";
+
+      setIsSuccess(true);
     } catch (error) {
       console.error(
         "Error submitting form:",
@@ -279,11 +279,71 @@ export default function ContributePage() {
     }
   };
 
-  if (user === null) {
+  if (isCheckingUser) {
     return (
-      <div>
+      <p style={{ padding: 24, color: "#234F3D" }}>
+        Checking your login...
+      </p>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div style={{ padding: 24, color: "#234F3D" }}>
         <p>You must be logged in to contribute.</p>
-        <a href="/login">Login</a>
+        <a href="/login">Log in</a>
+        {" | "}
+        <a href="/">← Home</a>
+      </div>
+    );
+  }
+
+  if (isSuccess) {
+    return (
+      <div className="success-page">
+        <h1>Thank You for Contributing!</h1>
+        <p>
+          Your entry has been submitted successfully and is waiting
+          for review.
+        </p>
+        <p>You can check its status on My Entries.</p>
+
+        <div className="success-actions">
+          <a href="/">Go to Home</a>
+          <a href="/my-entries">View My Entries</a>
+        </div>
+
+        <style>{`
+          .success-page {
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 24px;
+            color: #234F3D;
+            text-align: center;
+            font-family: Arial, sans-serif;
+          }
+
+          .success-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+          }
+
+          .success-actions a {
+            background: #234F3D;
+            color: #F3EBDD;
+            padding: 12px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+          }
+
+          .success-actions a:last-child {
+            background: #B89452;
+            color: #FFFFFF;
+          }
+        `}</style>
       </div>
     );
   }
@@ -304,6 +364,14 @@ export default function ContributePage() {
         .contribute-form h1 {
           margin-bottom: 28px;
           line-height: 1.4;
+        }
+
+        .home-link {
+          display: inline-block;
+          margin-bottom: 20px;
+          color: #234F3D;
+          text-decoration: none;
+          font-weight: 600;
         }
 
         .language-pair {
@@ -407,6 +475,10 @@ export default function ContributePage() {
       `}</style>
 
       <form onSubmit={handleSubmit} className="contribute-form">
+        <a href="/" className="home-link">
+          ← Home
+        </a>
+
         <h1>Contribute a Game</h1>
 
 

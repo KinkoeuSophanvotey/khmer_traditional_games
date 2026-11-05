@@ -19,6 +19,8 @@ const styles = {
     color: colors.deepGreen,
     fontFamily:
       "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    minHeight: "100vh",
+    boxSizing: "border-box",
   },
   navLink: {
     color: colors.deepGreen,
@@ -40,7 +42,7 @@ const styles = {
     color: "#856404",
     borderRadius: 6,
     fontSize: "13px",
-    fontFamily: "'Courier New', monospace",
+
   },
   statusPublished: {
     display: "inline-block",
@@ -49,7 +51,7 @@ const styles = {
     color: "#155724",
     borderRadius: 6,
     fontSize: "13px",
-    fontFamily: "'Courier New', monospace",
+
   },
   statusReturned: {
     display: "inline-block",
@@ -58,7 +60,7 @@ const styles = {
     color: "#721c24",
     borderRadius: 6,
     fontSize: "13px",
-    fontFamily: "'Courier New', monospace",
+
   },
 };
 
@@ -91,71 +93,99 @@ export default function MyEntriesPage() {
   const router = useRouter();
 
   const [entries, setEntries] = useState([]);
+  const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     async function loadData() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      try {
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
 
-      if (!user) {
-        router.push("/login");
-        return;
-      }
+        if (authError) throw authError;
 
-      const { data, error: fetchError } = await supabase
-        .from("entries")
-        .select("id, title_en, status")
-        .eq("owner", user.id);
+        if (!user) {
+          router.push("/login");
+          return;
+        }
 
-      if (fetchError) {
-        setError(fetchError.message);
+        setUserId(user.id);
+
+        const { data, error: fetchError } = await supabase
+          .from("entries")
+          .select("id, title_en, status, created_at")
+          .eq("owner", user.id)
+          .order("created_at", { ascending: false });
+
+        if (fetchError) throw fetchError;
+
+        setEntries(data || []);
+      } catch (err) {
+        setError(err.message || "Unable to load your entries.");
+      } finally {
         setLoading(false);
-        return;
+
       }
 
-      setEntries(data || []);
-      setLoading(false);
     }
 
     loadData();
   }, []);
 
+  const handleEdit = (entryId) => {
+    router.push(`/edit?id=${encodeURIComponent(entryId)}`);
+  };
+
+  const handleDelete = async (entry) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${entry.title_en || "Untitled"}"? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setDeletingId(entry.id);
+    setError(null);
+
+    try {
+      const { error: deleteError } = await supabase
+        .from("entries")
+        .delete()
+        .eq("id", entry.id)
+        .eq("owner", userId);
+
+      if (deleteError) throw deleteError;
+
+      setEntries((currentEntries) =>
+        currentEntries.filter((item) => item.id !== entry.id)
+      );
+    } catch (err) {
+      setError(
+        err.message || "Unable to delete this entry. Please try again."
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   if (loading) {
     return (
       <main style={styles.wrap}>
-        <p style={{ fontSize: "18px" }}>Loading your entries...</p>
+        <p>Loading your entries...</p>
       </main>
     );
   }
 
-  if (error) {
+  if (error && entries.length === 0) {
     return (
       <main style={styles.wrap}>
-        <p style={{ fontSize: "18px", color: colors.mutedGold }}>
-          {error}
-        </p>
-      </main>
-    );
-  }
-
-  if (entries.length === 0) {
-    return (
-      <main style={styles.wrap}>
-        <a href="/contribute" style={styles.navLink}>
-          ← Back
+        <a href="/" style={styles.navLink}>
+          ← Home
         </a>
-        <p
-          style={{
-            marginTop: "40px",
-            fontSize: "18px",
-            color: colors.mutedGold,
-          }}
-        >
-          You have no entries yet. Submit your first contribution!
-        </p>
+        <p style={{ color: "#b00020", marginTop: 24 }}>{error}</p>
       </main>
     );
   }
@@ -170,7 +200,7 @@ export default function MyEntriesPage() {
         style={{
           margin: "24px 0 16px",
           fontSize: "28px",
-          fontWeight: 700,
+          fontWeight: 600,
           color: colors.deepGreen,
           fontFamily: "'Courier New', monospace",
         }}
@@ -178,24 +208,94 @@ export default function MyEntriesPage() {
         My Entries
       </h1>
 
-      {entries.map((entry) => (
-        <div key={entry.id} style={styles.card}>
-          <h2
+      {error && (
+        <p style={{ color: "#b00020", marginBottom: 16 }}>
+          {error}
+        </p>
+      )}
+
+      {entries.length === 0 ? (
+        <div>
+          <p style={{ color: "#666", marginTop: 24 }}>
+            You have no entries yet. Submit your first contribution!
+          </p>
+          <button
+            onClick={() => router.push("/contribute")}
             style={{
-              margin: "0 0 12px",
-              fontSize: "20px",
-              fontWeight: 700,
-              color: colors.deepGreen,
-              lineHeight: 1.3,
+              marginTop: 12,
+              padding: "10px 18px",
+              backgroundColor: colors.deepGreen,
+              color: "#FFFFFF",
+              border: "none",
+              borderRadius: 6,
+              cursor: "pointer",
             }}
           >
-            {entry.title_en || "Untitled"}
-          </h2>
-          <span style={getStatusStyle(entry.status)}>
-            {getStatusLabel(entry.status)}
-          </span>
+            Contribute an Entry
+          </button>
         </div>
-      ))}
+      ) : (
+        entries.map((entry) => (
+          <div key={entry.id} style={styles.card}>
+            <h2
+              style={{
+                margin: "0 0 12px",
+                fontSize: "19px",
+                fontWeight: 500,
+                color: colors.deepGreen,
+                lineHeight: 1.5,
+              }}
+            >
+              {entry.title_en || "Untitled"}
+            </h2>
+
+            <span style={getStatusStyle(entry.status)}>
+              {getStatusLabel(entry.status)}
+            </span>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                flexWrap: "wrap",
+                marginTop: 18,
+              }}
+            >
+              <button
+                onClick={() => handleEdit(entry.id)}
+                disabled={deletingId === entry.id}
+                style={{
+                  padding: "9px 18px",
+                  backgroundColor: colors.deepGreen,
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontSize: 14,
+                }}
+              >
+                Edit
+              </button>
+
+              <button
+                onClick={() => handleDelete(entry)}
+                disabled={deletingId === entry.id}
+                style={{
+                  padding: "9px 18px",
+                  backgroundColor: "#FFFFFF",
+                  color: "#B02A37",
+                  border: "1px solid #B02A37",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontSize: 14,
+                }}
+              >
+                {deletingId === entry.id ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        ))
+      )}
     </main>
   );
 }
