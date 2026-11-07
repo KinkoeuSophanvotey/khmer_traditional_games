@@ -17,8 +17,6 @@ async function ReviewPage() {
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError) throw authError;
-
   if (!user) {
     return (
       <main style={{ padding: "48px 24px", color: "#8B3030" }}>
