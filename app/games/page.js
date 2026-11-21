@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
-import collection from "../../collection.config.js";
+
 import EntryCard from "../../components/EntryCard";
 import { createClient } from "../../lib/supabase/client.js";
 
@@ -12,18 +13,78 @@ const colors = {
 };
 
 export default function Games() {
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const [searchTerm, setSearchTerm] = useState("");
   const [lang, setLang] = useState("en");
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [isReviewer, setIsReviewer] = useState(false);
 
+  // Load the saved language.
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") || "en";
     setLang(savedLang);
   }, []);
 
+  // Check the signed-in user and listen for login/logout changes.
+  useEffect(() => {
+    let active = true;
+
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (active) {
+        setUser(error ? null : data.user);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setProfileOpen(false);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  // Show Review only if the user has reviewer permission.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkReviewer() {
+      if (!user) {
+        setIsReviewer(false);
+        return;
+      }
+
+      const { data, error } = await supabase.rpc("is_reviewer");
+
+      if (!cancelled) {
+        setIsReviewer(!error && data === true);
+      }
+    }
+
+    checkReviewer();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, supabase]);
+
+  // Log out the current user.
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setProfileOpen(false);
+  };
+
+  const username = user?.user_metadata?.username || "User";
+
+  // Load published games from Supabase.
   useEffect(() => {
     async function loadEntries() {
       const { data, error } = await supabase
@@ -101,8 +162,9 @@ export default function Games() {
     }
 
     loadEntries();
-  }, []);
+  }, [supabase]);
 
+  // Search games in both English and Khmer.
   const filteredEntries = entries.filter((entry) => {
     let search = searchTerm.toLowerCase().trim().replace(/^"|"$/g, "");
 
@@ -168,11 +230,14 @@ export default function Games() {
           color: colors.deepGreen,
         }}
       >
+        {/* Navigation */}
         <nav
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "16px",
             padding: "24px 0",
             borderBottom: `1px solid ${colors.mutedGold}`,
           }}
@@ -183,43 +248,205 @@ export default function Games() {
               fontSize: "13px",
               fontWeight: 700,
               letterSpacing: "1px",
+              color: colors.deepGreen,
             }}
           >
-            {lang === "en" ? "KHMER LIVING ARCHIVE" : "មរតកល្បែងប្រពៃណីខ្មែរ"}
+            {lang === "en"
+              ? "KHMER LIVING ARCHIVE"
+              : "មរតកល្បែងប្រពៃណីខ្មែរ"}
           </div>
 
           <div
             style={{
               display: "flex",
-              gap: "28px",
+              gap: "20px",
               alignItems: "center",
+              flexWrap: "wrap",
             }}
           >
-            <a
-              href="/"
-              style={{
-                color: colors.deepGreen,
-                textDecoration: "none",
-                fontSize: "14px",
-              }}
-            >
+            <a href="/" style={navLink}>
               {lang === "en" ? "Home" : "ទំព័រដើម"}
             </a>
 
             <a
               href="/games"
-              style={{
-                color: colors.deepGreen,
-                textDecoration: "none",
-                fontSize: "14px",
-                fontWeight: 700,
-              }}
+              style={{ ...navLink, fontWeight: 700 }}
+              aria-current="page"
             >
               {lang === "en" ? "Games" : "ល្បែងប្រពៃណីខ្មែរ"}
             </a>
+
+            {user ? (
+              <>
+                <a href="/contribute" style={navLink}>
+                  {lang === "en"
+                    ? "Contribute"
+                    : "ចូលរួមចែករំលែក"}
+                </a>
+
+                <a href="/my-entries" style={navLink}>
+                  {lang === "en"
+                    ? "My Entries"
+                    : "ជាធាតុរបស់ខ្ញុំ"}
+                </a>
+
+                {isReviewer && (
+                  <a href="/review" style={navLink}>
+                    {lang === "en" ? "Review" : "ពិនិត្យ"}
+                  </a>
+                )}
+
+                {/* Profile dropdown */}
+                <div style={{ position: "relative" }}>
+                  <button
+                    type="button"
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    aria-label="Open account details"
+                    aria-expanded={profileOpen}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      border: "none",
+                      background: "transparent",
+                      color: colors.deepGreen,
+                      cursor: "pointer",
+                      fontFamily: "'Courier New', monospace",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "36px",
+                        height: "36px",
+                        borderRadius: "50%",
+                        backgroundColor: colors.deepGreen,
+                        color: colors.warmBeige,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "18px",
+                        border: `2px solid ${colors.mutedGold}`,
+                      }}
+                    >
+                      {username.charAt(0).toUpperCase()}
+                    </span>
+
+                    <span>{username}</span>
+                    <span>{profileOpen ? "▲" : "▼"}</span>
+                  </button>
+
+                  {profileOpen && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "48px",
+                        right: 0,
+                        width: "260px",
+                        maxWidth: "calc(100vw - 48px)",
+                        padding: "18px",
+                        backgroundColor: colors.warmBeige,
+                        border: `1px solid ${colors.mutedGold}`,
+                        borderRadius: "12px",
+                        boxShadow: "0 6px 20px rgba(0,0,0,0.12)",
+                        zIndex: 10,
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: "0 0 16px",
+                          fontSize: "16px",
+                          fontWeight: 700,
+                          color: colors.deepGreen,
+                        }}
+                      >
+                        {lang === "en"
+                          ? "Account Details"
+                          : "ព័ត៌មានគណនី"}
+                      </p>
+
+                      <p
+                        style={{
+                          margin: "0 0 6px",
+                          color: colors.mutedGold,
+                          fontSize: "12px",
+                        }}
+                      >
+                        {lang === "en"
+                          ? "Username"
+                          : "ឈ្មោះអ្នកប្រើ"}
+                      </p>
+
+                      <p
+                        style={{
+                          margin: "0 0 14px",
+                          color: colors.deepGreen,
+                          fontSize: "14px",
+                        }}
+                      >
+                        {user.user_metadata?.username ||
+                          (lang === "en"
+                            ? "Not set"
+                            : "មិនទាន់កំណត់")}
+                      </p>
+
+                      <p
+                        style={{
+                          margin: "0 0 6px",
+                          color: colors.mutedGold,
+                          fontSize: "12px",
+                        }}
+                      >
+                        {lang === "en" ? "Email" : "អ៊ីមែល"}
+                      </p>
+
+                      <p
+                        style={{
+                          margin: "0 0 18px",
+                          color: colors.deepGreen,
+                          fontSize: "14px",
+                        }}
+                      >
+                        {user.email}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        style={{
+                          width: "100%",
+                          padding: "10px",
+                          backgroundColor: colors.deepGreen,
+                          color: colors.warmBeige,
+                          border: "none",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          fontSize: "14px",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {lang === "en" ? "Logout" : "ចាកចេញ"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <a href="/login" style={navLink}>
+                  {lang === "en" ? "Login" : "ចូលគណនី"}
+                </a>
+
+                <a href="/signup" style={navLink}>
+                  {lang === "en" ? "Sign up" : "បង្កើតគណនី"}
+                </a>
+              </>
+            )}
           </div>
         </nav>
 
+        {/* Collection heading */}
         <section
           style={{
             padding: "64px 0 40px",
@@ -253,12 +480,15 @@ export default function Games() {
               : "ល្បែងប្រពៃណីខ្មែរ"}
           </h1>
 
+          {/* Collection description */}
           <p
             style={{
               fontSize: "17px",
               lineHeight: 1.7,
               margin: 0,
-              maxWidth: "680px",
+              maxWidth: "100%",
+              textAlign: "left",
+              textIndent: 0,
             }}
           >
             {lang === "en"
@@ -267,6 +497,7 @@ export default function Games() {
           </p>
         </section>
 
+        {/* Search */}
         <div
           style={{
             display: "flex",
@@ -287,7 +518,9 @@ export default function Games() {
             <input
               type="text"
               placeholder={
-                lang === "en" ? "Search games..." : "ស្វែងរកល្បែង..."
+                lang === "en"
+                  ? "Search games..."
+                  : "ស្វែងរកល្បែង..."
               }
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -324,6 +557,7 @@ export default function Games() {
           </div>
         </div>
 
+        {/* Number of games */}
         <p
           style={{
             fontFamily: "'Courier New', monospace",
@@ -337,6 +571,7 @@ export default function Games() {
             : `ល្បែង ${filteredEntries.length} នៅក្នុងបណ្ណសារ`}
         </p>
 
+        {/* Game results */}
         {loading ? (
           <div
             style={{
@@ -388,6 +623,7 @@ export default function Games() {
           </div>
         )}
 
+        {/* Footer */}
         <footer
           style={{
             marginTop: "80px",
@@ -398,11 +634,18 @@ export default function Games() {
             textAlign: "center",
           }}
         >
-          Built in ICT 340 — Vibe Coding, American University of Phnom Penh,
-          Fall 2026. This archive is under construction all semester. Come
-          back in December.
+          {lang === "en"
+            ? "Built in ICT 340 — Vibe Coding, American University of Phnom Penh, Fall 2026. This archive is under construction all semester. Come back in December."
+            : "បង្កើតឡើងក្នុងមុខវិជ្ជា ICT 340 — Vibe Coding នៅសាកលវិទ្យាល័យអាមេរិកាំងភ្នំពេញ ឆមាសសរទរដូវ ឆ្នាំ ២០២៦។ បណ្ណសារនេះកំពុងស្ថិតក្នុងដំណាក់កាលសាងសង់ពេញមួយឆមាស។ សូមត្រឡប់មកមើលម្ដងទៀតនៅខែធ្នូ។"}
         </footer>
       </main>
     </>
   );
 }
+
+// Navigation link styling.
+const navLink = {
+  color: colors.deepGreen,
+  textDecoration: "none",
+  fontSize: "14px",
+};
