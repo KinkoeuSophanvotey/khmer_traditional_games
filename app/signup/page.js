@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -53,7 +54,11 @@ const styles = {
     cursor: "pointer",
     fontFamily: "'Courier New', monospace",
     textAlign: "center",
+    textDecoration: "none",
     marginTop: "8px",
+    width: "100%",
+    maxWidth: 360,
+    boxSizing: "border-box",
   },
   error: {
     color: "#C0392B",
@@ -142,11 +147,13 @@ export default function SignupPage() {
       <h1 style={styles.title}>
         {lang === "en" ? "Sign Up" : "ចុះឈ្មោះ"}
       </h1>
+
       <p style={styles.subtitle}>
         {lang === "en"
-          ? "Create your archive account"
-          : "បង្កើតគណនីបណ្ណសាររបស់អ្នក"}
+          ? "Account Created Successfully!"
+          : "គណនីត្រូវបានបង្កើតដោយជោគជ័យ!"}
       </p>
+
       {!success ? (
         <>
           <form onSubmit={handleSubmit} style={styles.form}>
@@ -158,6 +165,7 @@ export default function SignupPage() {
               required
               style={styles.input}
             />
+
             <input
               type="email"
               placeholder={lang === "en" ? "Email" : "អ៊ីមែល"}
@@ -166,6 +174,7 @@ export default function SignupPage() {
               required
               style={styles.input}
             />
+
             <div style={{ position: "relative", width: "100%" }}>
               <input
                 type={showPassword ? "text" : "password"}
@@ -195,11 +204,14 @@ export default function SignupPage() {
                 {showPassword ? "◉" : "⊘"}
               </button>
             </div>
+
             {error && <p style={styles.error}>{error}</p>}
+
             <button type="submit" style={styles.button}>
               {lang === "en" ? "Sign Up" : "ចុះឈ្មោះ"}
             </button>
           </form>
+
           <a href="/login" style={styles.link}>
             {lang === "en"
               ? "Already have an account? Sign in"
@@ -207,11 +219,18 @@ export default function SignupPage() {
           </a>
         </>
       ) : (
-        <p style={styles.success}>
-          {lang === "en"
-            ? "Account created! You can now sign in."
-            : "បានបង្កើតគណនីរួចរាល់! ឥឡូវនេះអ្នកអាចចូលគណនីបាន។"}
-        </p>
+        <>
+          <p style={styles.success}>
+            {lang === "en"
+              ? "Your account has been created. You can now return to the homepage and explore the Khmer Traditional Games Archive."
+              : "គណនីរបស់អ្នកត្រូវបានបង្កើតរួចរាល់ហើយ។ ឥឡូវនេះ អ្នកអាចត្រឡប់ទៅទំព័រដើម និងស្វែងយល់អំពីហ្គេមប្រពៃណីខ្មែរបាន។"}
+          </p>
+
+          <a href="/" style={styles.button}>
+            {lang === "en" ? "Back to Home Page" : "ត្រឡប់ទៅទំព័រដើម"}
+          </a>
+
+        </>
       )}
     </main>
   );
