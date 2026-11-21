@@ -1,10 +1,4 @@
-// ============================================================
-//  YOUR ARCHIVE STARTS HERE
-//
-//  This is the only file you edit in Lab 1.
-//  Change the four values below, commit, and watch your
-//  live site update itself.
-// ============================================================
+
 
 const collection = {
   // What does your archive collect? e.g. "Khmer Proverbs"
@@ -17,7 +11,10 @@ const collection = {
   curator: "Kinkoeu Sophanvotey",
 
   // Where does your knowledge come from? A person, a place, a community.
-  source: "My grandparents and older people in my community who played these games when they were young.",
+  source: {
+    en: "My grandparents, my sister, and my friends, who shared their knowledge and experiences of Khmer traditional games.",
+    km: "ជីដូនជីតា ប្អូនស្រី និងមិត្តភក្តិរបស់ខ្ញុំ ដែលបានចែករំលែកចំណេះដឹង និងបទពិសោធន៍របស់ពួកគេអំពីល្បែងប្រពៃណីខ្មែរ។",
+  },
 };
 
 export default collection;
