@@ -1,13 +1,7 @@
 
 import { createClient } from "../../lib/supabase/server.js";
 import ReviewQueue from "../../components/ReviewQueue.js";
-
-const link = {
-  color: "#234F3D",
-  textDecoration: "none",
-  fontSize: 14,
-  fontWeight: 500,
-};
+import ReviewPageHeader from "../../components/ReviewPageHeader.js";
 
 async function ReviewPage() {
   const supabase = await createClient();
@@ -58,24 +52,7 @@ async function ReviewPage() {
           "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
-      <a href="/" style={link}>
-        ← Home
-      </a>
-
-      <h1
-        style={{
-          fontSize: "28px",
-          margin: "24px 0 12px",
-          color: "#234F3D",
-          fontWeight: 700,
-        }}
-      >
-        Review Submissions
-      </h1>
-
-      <p style={{ margin: "0 0 20px", color: "#555", lineHeight: 1.6 }}>
-        Review pending contributions before they appear in the public archive.
-      </p>
+      <ReviewPageHeader />
 
       <ReviewQueue entries={data || []} />
     </main>
