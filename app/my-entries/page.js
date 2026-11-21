@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,7 +19,7 @@ const styles = {
     backgroundColor: colors.warmBeige,
     color: colors.deepGreen,
     fontFamily:
-      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      '"Noto Sans Khmer", "Noto Sans", Arial, sans-serif',
     minHeight: "100vh",
     boxSizing: "border-box",
   },
@@ -26,7 +27,7 @@ const styles = {
     color: colors.deepGreen,
     textDecoration: "none",
     fontSize: "14px",
-    fontFamily: "'Courier New', monospace",
+
   },
   card: {
     backgroundColor: "#FFFFFF",
@@ -64,15 +65,21 @@ const styles = {
   },
 };
 
-function getStatusLabel(status) {
+function getStatusLabel(status, lang) {
   switch (status) {
     case "published":
-      return "Published";
+      return lang === "en" ? "Published" : "បានផ្សាយ";
+
     case "returned":
-      return "Returned for revision";
+      return lang === "en"
+        ? "Returned for revision"
+        : "បានបញ្ជូនត្រឡប់ដើម្បីកែសម្រួល";
+
     case "pending":
     default:
-      return "Pending review";
+      return lang === "en"
+        ? "Pending review"
+        : "កំពុងរង់ចាំការត្រួតពិនិត្យ";
   }
 }
 
@@ -80,8 +87,10 @@ function getStatusStyle(status) {
   switch (status) {
     case "published":
       return styles.statusPublished;
+
     case "returned":
       return styles.statusReturned;
+
     case "pending":
     default:
       return styles.statusPending;
@@ -97,7 +106,18 @@ export default function MyEntriesPage() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
   const [error, setError] = useState(null);
+  const [lang, setLang] = useState("en");
 
+  const t = (english, khmer) =>
+    lang === "en" ? english : khmer;
+
+  // Load the saved website language
+  useEffect(() => {
+    const savedLang = localStorage.getItem("lang") || "en";
+    setLang(savedLang === "km" ? "km" : "en");
+  }, []);
+
+  // Load the user's entries
   useEffect(() => {
     async function loadData() {
       try {
@@ -117,7 +137,7 @@ export default function MyEntriesPage() {
 
         const { data, error: fetchError } = await supabase
           .from("entries")
-          .select("id, title_en, status, created_at")
+          .select("id, title_en, title_kh, status, created_at")
           .eq("owner", user.id)
           .order("created_at", { ascending: false });
 
@@ -125,7 +145,11 @@ export default function MyEntriesPage() {
 
         setEntries(data || []);
       } catch (err) {
-        setError(err.message || "Unable to load your entries.");
+        console.error("Error loading entries:", err);
+        setError(
+          err.message ||
+            "Unable to load your entries."
+        );
       } finally {
         setLoading(false);
 
@@ -141,8 +165,16 @@ export default function MyEntriesPage() {
   };
 
   const handleDelete = async (entry) => {
+    const entryTitle =
+      (lang === "en"
+        ? entry.title_en
+        : entry.title_kh) || "Untitled";
+
     const confirmed = window.confirm(
-      `Are you sure you want to delete "${entry.title_en || "Untitled"}"? This action cannot be undone.`
+      t(
+        `Are you sure you want to delete "${entryTitle}"? This action cannot be undone.`,
+        `តើអ្នកប្រាកដថាចង់លុប "${entryTitle}" មែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។`
+      )
     );
 
     if (!confirmed) return;
@@ -163,8 +195,13 @@ export default function MyEntriesPage() {
         currentEntries.filter((item) => item.id !== entry.id)
       );
     } catch (err) {
+      console.error("Error deleting entry:", err);
+
       setError(
-        err.message || "Unable to delete this entry. Please try again."
+        t(
+          "Unable to delete this entry. Please try again.",
+          "មិនអាចលុបទិន្នន័យហ្គេមនេះបានទេ។ សូមព្យាយាមម្តងទៀត។"
+        )
       );
     } finally {
       setDeletingId(null);
@@ -174,7 +211,7 @@ export default function MyEntriesPage() {
   if (loading) {
     return (
       <main style={styles.wrap}>
-        <p>Loading your entries...</p>
+        <p>{t("Loading your entries...", "កំពុងផ្ទុកទិន្នន័យហ្គេមរបស់អ្នក...")}</p>
       </main>
     );
   }
@@ -183,9 +220,12 @@ export default function MyEntriesPage() {
     return (
       <main style={styles.wrap}>
         <a href="/" style={styles.navLink}>
-          ← Home
+          {t("← Home", "← ទំព័រដើម")}
         </a>
-        <p style={{ color: "#b00020", marginTop: 24 }}>{error}</p>
+
+        <p style={{ color: "#b00020", marginTop: 24 }}>
+          {error}
+        </p>
       </main>
     );
   }
@@ -193,7 +233,7 @@ export default function MyEntriesPage() {
   return (
     <main style={styles.wrap}>
       <a href="/" style={styles.navLink}>
-        ← Home
+        {t("← Home", "← ទំព័រដើម")}
       </a>
 
       <h1
@@ -202,10 +242,10 @@ export default function MyEntriesPage() {
           fontSize: "28px",
           fontWeight: 600,
           color: colors.deepGreen,
-          fontFamily: "'Courier New', monospace",
+
         }}
       >
-        My Entries
+        {t("My Entries", "ទិន្នន័យល្បែងប្រជាប្រិយរបស់ខ្ញុំ")}
       </h1>
 
       {error && (
@@ -217,8 +257,12 @@ export default function MyEntriesPage() {
       {entries.length === 0 ? (
         <div>
           <p style={{ color: "#666", marginTop: 24 }}>
-            You have no entries yet. Submit your first contribution!
+            {t(
+              "You have no entries yet. Submit your first contribution!",
+              "អ្នកមិនទាន់មានទិន្នន័យហ្គេមនៅឡើយទេ។ សូមចែករំលែកហ្គេមដំបូងរបស់អ្នក!"
+            )}
           </p>
+
           <button
             onClick={() => router.push("/contribute")}
             style={{
@@ -229,9 +273,10 @@ export default function MyEntriesPage() {
               border: "none",
               borderRadius: 6,
               cursor: "pointer",
+              fontFamily: "inherit",
             }}
           >
-            Contribute an Entry
+            {t("Contribute an Entry", "ចែករំលែកទិន្នន័យហ្គេម")}
           </button>
         </div>
       ) : (
@@ -243,14 +288,17 @@ export default function MyEntriesPage() {
                 fontSize: "19px",
                 fontWeight: 500,
                 color: colors.deepGreen,
-                lineHeight: 1.5,
+                lineHeight: 1.7,
+                fontFamily: "inherit",
               }}
             >
-              {entry.title_en || "Untitled"}
+              {(lang === "en"
+                ? entry.title_en
+                : entry.title_kh) || "Untitled"}
             </h2>
 
             <span style={getStatusStyle(entry.status)}>
-              {getStatusLabel(entry.status)}
+              {getStatusLabel(entry.status, lang)}
             </span>
 
             <div
@@ -272,9 +320,10 @@ export default function MyEntriesPage() {
                   borderRadius: 6,
                   cursor: "pointer",
                   fontSize: 14,
+                  fontFamily: "inherit",
                 }}
               >
-                Edit
+                {t("Edit", "កែសម្រួល")}
               </button>
 
               <button
@@ -288,9 +337,12 @@ export default function MyEntriesPage() {
                   borderRadius: 6,
                   cursor: "pointer",
                   fontSize: 14,
+                  fontFamily: "inherit",
                 }}
               >
-                {deletingId === entry.id ? "Deleting..." : "Delete"}
+                {deletingId === entry.id
+                  ? t("Deleting...", "កំពុងលុប...")
+                  : t("Delete", "លុប")}
               </button>
             </div>
           </div>

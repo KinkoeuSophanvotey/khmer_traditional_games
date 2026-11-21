@@ -1,3 +1,4 @@
+
 "use client";
 
 import collection from "../collection.config.js";
@@ -124,7 +125,11 @@ export default function Home() {
             flexWrap: "wrap",
           }}
         >
-          <a href="#home" style={navLink}>
+          <a
+            href="#home"
+            style={{ ...navLink, fontWeight: 700 }}
+            aria-current="page"
+          >
             {lang === "en" ? "Home" : "ទំព័រដើម"}
           </a>
 
@@ -144,7 +149,7 @@ export default function Home() {
 
               {isReviewer && (
                 <a href="/review" style={navLink}>
-                {lang === "en" ? "Review" : "ពិនិត្យ"}
+                  {lang === "en" ? "Review" : "ពិនិត្យ"}
                 </a>
               )}
 
@@ -234,7 +239,8 @@ export default function Home() {
                         fontSize: "14px",
                       }}
                     >
-                      {user.user_metadata?.username || "Not set"}
+                      {user.user_metadata?.username ||
+                        (lang === "en" ? "Not set" : "មិនទាន់កំណត់")}
                     </p>
 
                     <p
@@ -244,7 +250,7 @@ export default function Home() {
                         fontSize: "12px",
                       }}
                     >
-                      Email
+                      {lang === "en" ? "Email" : "អ៊ីមែល"}
                     </p>
 
                     <p
@@ -352,7 +358,7 @@ export default function Home() {
           </a>
 
           <a
-            href="/signup"
+            href={user ? "/contribute" : "/signup"}
             style={{ ...pillLink, marginLeft: "12px" }}
           >
             {lang === "en"
@@ -425,11 +431,17 @@ export default function Home() {
         }}
       >
         <p style={{ margin: "0 0 8px" }}>
-          <strong>Curated by:</strong> {collection.curator}
+          <strong>
+            {lang === "en" ? "Curated by:" : "រៀបចំដោយ៖"}
+          </strong>{" "}
+          {collection.curator}
         </p>
 
         <p style={{ margin: 0 }}>
-          <strong>Source:</strong> {collection.source}
+          <strong>
+            {lang === "en" ? "Source:" : "ប្រភព៖"}
+          </strong>{" "}
+          {collection.source[lang]}
         </p>
       </div>
 
@@ -443,9 +455,9 @@ export default function Home() {
           textAlign: "center",
         }}
       >
-        Built in ICT 340 — Vibe Coding, American University of Phnom Penh, Fall
-        2026. This archive is under construction all semester. Come back in
-        December.
+        {lang === "en"
+          ? "Built in ICT 340 — Vibe Coding, American University of Phnom Penh, Fall 2026. This archive is under construction all semester. Come back in December."
+          : "បង្កើតឡើងក្នុងមុខវិជ្ជា ICT 340 — Vibe Coding នៅសាកលវិទ្យាល័យអាមេរិកាំងភ្នំពេញ ឆមាសនារដូវស្លឹកឈើជ្រុះ ឆ្នាំ ២០២៦។ បណ្ណសារនេះកំពុងស្ថិតក្នុងដំណាក់កាលសាងសង់ពេញមួយឆមាស។ សូមត្រឡប់មកមើលម្ដងទៀតនៅខែធ្នូ។"}
       </footer>
     </main>
   );

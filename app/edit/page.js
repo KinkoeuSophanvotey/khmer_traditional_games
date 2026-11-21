@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -13,6 +14,8 @@ function EditPageContent() {
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lang, setLang] = useState("en");
+
   const [formData, setFormData] = useState({
     title_en: "",
     title_kh: "",
@@ -29,9 +32,99 @@ function EditPageContent() {
   });
 
   const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState("");
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+
+  const t = (english, khmer) => (lang === "en" ? english : khmer);
+
+  // Character limits for all fields
+  const fieldLimits = {
+    title_en: 120,
+    title_kh: 120,
+    description_en: 1000,
+    description_kh: 1000,
+    how_it_is_played_en: 3000,
+    how_it_is_played_kh: 3000,
+    rules_en: 3000,
+    rules_kh: 3000,
+    contributor_en: 100,
+    contributor_kh: 100,
+    place_en: 200,
+    place_kh: 200,
+  };
+
+  const fieldLabels = {
+    title_en: ["Title (English)", "ចំណងជើង (ភាសាអង់គ្លេស)"],
+    title_kh: ["Title (Khmer)", "ចំណងជើង (ភាសាខ្មែរ)"],
+    description_en: ["Description (English)", "ការពិពណ៌នា (ភាសាអង់គ្លេស)"],
+    description_kh: ["Description (Khmer)", "ការពិពណ៌នា (ភាសាខ្មែរ)"],
+    how_it_is_played_en: ["How It Is Played (English)", "របៀបលេង (ភាសាអង់គ្លេស)"],
+    how_it_is_played_kh: ["How It Is Played (Khmer)", "របៀបលេង (ភាសាខ្មែរ)"],
+    rules_en: ["Rules (English)", "ច្បាប់នៃការលេង (ភាសាអង់គ្លេស)"],
+    rules_kh: ["Rules (Khmer)", "ច្បាប់នៃការលេង (ភាសាខ្មែរ)"],
+    contributor_en: ["Contributor (English)", "អ្នកចូលរួមចែករំលែក (ភាសាអង់គ្លេស)"],
+    contributor_kh: ["Contributor (Khmer)", "អ្នកចូលរួមចែករំលែក (ភាសាខ្មែរ)"],
+    place_en: ["Place (English)", "ទីកន្លែង (ភាសាអង់គ្លេស)"],
+    place_kh: ["Place (Khmer)", "ទីកន្លែង (ភាសាខ្មែរ)"],
+  };
+
+  const getLengthErrorMessage = (name) => {
+    const limit = fieldLimits[name];
+    const [englishLabel, khmerLabel] = fieldLabels[name];
+
+    return t(
+      `${englishLabel} must be 1-${limit} characters.`,
+      `${khmerLabel} ត្រូវមានពី ១ ដល់ ${limit} តួអក្សរ។`
+    );
+  };
+
+  const getLimitHint = (name) => {
+    const limit = fieldLimits[name];
+
+    return t(
+      `Maximum ${limit} characters.`,
+      `អតិបរមា ${limit} តួអក្សរ។`
+    );
+  };
+
+  // Check character limits immediately while typing
+  const updateLengthError = (name, value) => {
+    const limit = fieldLimits[name];
+
+    setErrors((prev) => {
+      const updatedErrors = { ...prev };
+
+      if (value.trim().length > limit) {
+        updatedErrors[name] = getLengthErrorMessage(name);
+      } else {
+        delete updatedErrors[name];
+      }
+
+      return updatedErrors;
+    });
+  };
+
+  // Show the original filename only for a newly selected photo.
+  const displayedPhotoFileName = photoFile?.name || "";
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem("lang") || "en";
+    setLang(savedLang === "km" ? "km" : "en");
+  }, []);
+
+  useEffect(() => {
+    if (!photoFile) {
+      setPhotoPreviewUrl("");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(photoFile);
+    setPhotoPreviewUrl(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [photoFile]);
 
   useEffect(() => {
     async function loadData() {
@@ -47,7 +140,7 @@ function EditPageContent() {
       setUser(user);
 
       if (!entryId) {
-        alert("Entry not found.");
+        alert(t("Entry not found.", "រកមិនឃើញទិន្នន័យហ្គេមទេ។"));
         router.push("/games");
         return;
       }
@@ -60,13 +153,23 @@ function EditPageContent() {
 
       if (error || !data) {
         console.error("Error loading entry for edit:", error);
-        alert("Unable to load this entry.");
+        alert(
+          t(
+            "Unable to load this entry.",
+            "មិនអាចបង្ហាញទិន្នន័យហ្គេមនេះបានទេ។"
+          )
+        );
         router.push("/games");
         return;
       }
 
       if (data.owner !== user.id) {
-        alert("You can only edit your own entries.");
+        alert(
+          t(
+            "You can only edit your own entries.",
+            "អ្នកអាចកែសម្រួលតែទិន្នន័យហ្គេមរបស់អ្នកប៉ុណ្ណោះ។"
+          )
+        );
         router.push("/games");
         return;
       }
@@ -96,10 +199,12 @@ function EditPageContent() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
+
+    updateLengthError(name, value);
   };
 
   const handleTextareaChange = (e) => {
@@ -108,10 +213,12 @@ function EditPageContent() {
     e.target.style.height = "auto";
     e.target.style.height = `${e.target.scrollHeight}px`;
 
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
+
+    updateLengthError(name, value);
   };
 
   const handlePhotoChange = (e) => {
@@ -119,85 +226,45 @@ function EditPageContent() {
 
     if (file) {
       setPhotoFile(file);
+      setErrors((prev) => ({
+        ...prev,
+        photo: "",
+      }));
     }
+  };
+
+  const handleRevertPhoto = () => {
+    setPhotoFile(null);
+
+    const photoInput = document.getElementById("photo");
+
+    if (photoInput) {
+      photoInput.value = "";
+    }
+
+    setErrors((prev) => ({
+      ...prev,
+      photo: "",
+    }));
   };
 
   const validateForm = () => {
     const newErrors = {};
 
-    const titleEn = formData.title_en.trim();
-    const titleKh = formData.title_kh.trim();
-    const descriptionEn = formData.description_en.trim();
-    const descriptionKh = formData.description_kh.trim();
-    const howItIsPlayedEn =
-      formData.how_it_is_played_en.trim();
-    const howItIsPlayedKh =
-      formData.how_it_is_played_kh.trim();
-    const rulesEn = formData.rules_en.trim();
-    const rulesKh = formData.rules_kh.trim();
-    const contributorEn = formData.contributor_en.trim();
-    const contributorKh = formData.contributor_kh.trim();
-    const placeEn = formData.place_en.trim();
-    const placeKh = formData.place_kh.trim();
+    Object.keys(fieldLimits).forEach((name) => {
+      const value = formData[name].trim();
+      const limit = fieldLimits[name];
 
-    if (!titleEn || titleEn.length > 120) {
-      newErrors.title_en =
-        "Title (English) must be 1-120 characters.";
-    }
+      if (!value || value.length > limit) {
+        newErrors[name] = getLengthErrorMessage(name);
+      }
+    });
 
-    if (!titleKh || titleKh.length > 120) {
-      newErrors.title_kh =
-        "Title (Khmer) must be 1-120 characters.";
-    }
-
-    if (!descriptionEn || descriptionEn.length > 1000) {
-      newErrors.description_en =
-        "Description (English) must be 1-1000 characters.";
-    }
-
-    if (!descriptionKh || descriptionKh.length > 1000) {
-      newErrors.description_kh =
-        "Description (Khmer) must be 1-1000 characters.";
-    }
-
-    if (!howItIsPlayedEn || howItIsPlayedEn.length > 3000) {
-      newErrors.how_it_is_played_en =
-        "How It Is Played (English) must be 1-3000 characters.";
-    }
-
-    if (!howItIsPlayedKh || howItIsPlayedKh.length > 3000) {
-      newErrors.how_it_is_played_kh =
-        "How It Is Played (Khmer) must be 1-3000 characters.";
-    }
-
-    if (!rulesEn || rulesEn.length > 3000) {
-      newErrors.rules_en =
-        "Rules (English) must be 1-3000 characters.";
-    }
-
-    if (!rulesKh || rulesKh.length > 3000) {
-      newErrors.rules_kh =
-        "Rules (Khmer) must be 1-3000 characters.";
-    }
-
-    if (!contributorEn || contributorEn.length > 100) {
-      newErrors.contributor_en =
-        "Contributor (English) must be 1-100 characters.";
-    }
-
-    if (!contributorKh || contributorKh.length > 100) {
-      newErrors.contributor_kh =
-        "Contributor (Khmer) must be 1-100 characters.";
-    }
-
-    if (!placeEn || placeEn.length > 200) {
-      newErrors.place_en =
-        "Place (English) must be 1-200 characters.";
-    }
-
-    if (!placeKh || placeKh.length > 200) {
-      newErrors.place_kh =
-        "Place (Khmer) must be 1-200 characters.";
+    if (!photoFile && !currentPhotoUrl) {
+      newErrors.photo = t(
+        "Photo is required.",
+        "សូមបញ្ចូលរូបថត។"
+      );
     }
 
     if (photoFile) {
@@ -208,13 +275,17 @@ function EditPageContent() {
       ];
 
       if (!validTypes.includes(photoFile.type)) {
-        newErrors.photo =
-          "Only JPEG, PNG, and WebP files are allowed.";
+        newErrors.photo = t(
+          "Only JPEG, PNG, and WebP files are allowed.",
+          "អនុញ្ញាតតែឯកសាររូបភាពប្រភេទ JPEG, PNG និង WebP ប៉ុណ្ណោះ។"
+        );
       }
 
       if (photoFile.size > 5 * 1024 * 1024) {
-        newErrors.photo =
-          "File size must be less than 5 MB.";
+        newErrors.photo = t(
+          "File size must be less than 5 MB.",
+          "ទំហំឯកសារត្រូវតិចជាង ៥ MB។"
+        );
       }
     }
 
@@ -260,19 +331,7 @@ function EditPageContent() {
         photoUrl = publicUrl;
       }
 
-      // Check if user is a reviewer by calling the RPC function
-      let isReviewer = false;
-      try {
-        const { data: isReviewerData, error: reviewerError } = await supabase.rpc(
-          "is_reviewer"
-        );
-        if (!reviewerError && isReviewerData !== null) {
-          isReviewer = !!isReviewerData;
-        }
-      } catch (error) {
-        // If the RPC function doesn't exist or fails, assume not a reviewer
-        console.error("Error checking reviewer status:", error);
-      }
+
 
       const updatePayload = {
         title_en: formData.title_en.trim(),
@@ -288,12 +347,12 @@ function EditPageContent() {
         place_en: formData.place_en.trim(),
         place_kh: formData.place_kh.trim(),
         photo_url: photoUrl,
+
+        // Every owner edit sends the entry back for review.
+        status: "pending",
       };
 
-      // Only set status to 'pending' for normal owners, not reviewers
-      if (!isReviewer) {
-        updatePayload.status = "pending";
-      }
+
 
       const { data, error: updateError } = await supabase
         .from("entries")
@@ -307,7 +366,12 @@ function EditPageContent() {
 
       if (!data || data.length === 0) {
         console.error("Update returned no row.");
-        alert("That change wasn't saved");
+        alert(
+          t(
+            "That change wasn't saved.",
+            "ការផ្លាស់ប្តូរនេះមិនត្រូវបានរក្សាទុកទេ។"
+          )
+        );
         return;
       }
 
@@ -320,14 +384,20 @@ function EditPageContent() {
         error?.hint,
         error?.code
       );
-      alert("An error occurred. Please try again.");
+
+      alert(
+        t(
+          "An error occurred. Please try again.",
+          "មានបញ្ហាកើតឡើង។ សូមព្យាយាមម្តងទៀត។"
+        )
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p>{t("Loading...", "កំពុងដំណើរការ...")}</p>;
   }
 
   return (
@@ -340,11 +410,7 @@ function EditPageContent() {
           padding: 24px;
           box-sizing: border-box;
           color: #234F3D;
-          font-family:
-            "Noto Sans Khmer",
-            "Noto Sans",
-            Arial,
-            sans-serif;
+          font-family: "Noto Sans Khmer", "Noto Sans", Arial, sans-serif;
         }
 
         .edit-form h1 {
@@ -367,7 +433,7 @@ function EditPageContent() {
           margin-bottom: 0;
         }
 
-        .form-field label {
+        .form-field > label {
           display: block;
           margin-bottom: 7px;
           font-weight: 600;
@@ -375,21 +441,13 @@ function EditPageContent() {
         }
 
         .edit-form input[type="text"],
-        .edit-form textarea,
-        .edit-form input[type="file"] {
+        .edit-form textarea {
           width: 100%;
           box-sizing: border-box;
-          font-family:
-            "Noto Sans Khmer",
-            "Noto Sans",
-            Arial,
-            sans-serif;
+          font-family: "Noto Sans Khmer", "Noto Sans", Arial, sans-serif;
           font-size: 16px;
           line-height: 1.6;
-        }
-
-        .edit-form input[type="text"],
-        .edit-form textarea {
+          
           padding: 9px 12px;
           border: 1px solid #234F3D;
           border-radius: 6px;
@@ -407,13 +465,11 @@ function EditPageContent() {
           resize: none;
         }
 
-        .edit-form input[type="file"] {
-          padding: 8px;
-          border: 1px solid #234F3D;
-          border-radius: 6px;
-          background: #F3EBDD;
-          color: #234F3D;
-          cursor: pointer;
+        .field-hint {
+          margin-top: 5px;
+          color: #718075;
+          font-size: 12px;
+          line-height: 1.5;
         }
 
         .error {
@@ -430,11 +486,7 @@ function EditPageContent() {
           border-radius: 6px;
           background: #234F3D;
           color: #F3EBDD;
-          font-family:
-            "Noto Sans Khmer",
-            "Noto Sans",
-            Arial,
-            sans-serif;
+          font-family: "Noto Sans Khmer", "Noto Sans", Arial, sans-serif;
           font-size: 16px;
           cursor: pointer;
         }
@@ -442,6 +494,150 @@ function EditPageContent() {
         .submit-button:disabled {
           opacity: 0.6;
           cursor: not-allowed;
+        }
+
+        /* Photo upload area */
+        .photo-upload-area {
+          width: 100%;
+          box-sizing: border-box;
+          border: 1.5px dashed #B89452;
+          border-radius: 12px;
+          background: #F3EBDD;
+          padding: 20px;
+          transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .photo-upload-area:hover {
+          border-color: #234F3D;
+          background: #eee7d7;
+        }
+
+        .photo-input {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+
+        .photo-upload-area:focus-within {
+          outline: 2px solid #234F3D;
+          outline-offset: 3px;
+        }
+
+        .photo-upload-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          gap: 8px;
+          width: 100%;
+          color: #234F3D;
+        }
+
+        .photo-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 58px;
+          height: 58px;
+          border-radius: 50%;
+          background: #e5dfcf;
+          color: #234F3D;
+        }
+
+        .photo-upload-content strong {
+          font-size: 16px;
+          font-weight: 600;
+        }
+
+        .photo-upload-content > span {
+          font-size: 14px;
+          line-height: 1.6;
+        }
+
+        .photo-preview {
+          display: block;
+          width: 100%;
+          max-width: 280px;
+          height: 180px;
+          object-fit: contain;
+          border-radius: 8px;
+        }
+
+        .photo-filename {
+          display: block;
+          width: 100%;
+          max-width: 280px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: #718075;
+          font-size: 12px;
+          line-height: 1.5;
+        }
+
+        .photo-action-text {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: center;
+          gap: 6px;
+          width: 100%;
+          text-align: center;
+          line-height: 1.6;
+        }
+
+        .photo-change-action {
+          display: inline-block;
+          color: #234F3D;
+          font-size: 14px;
+          font-weight: 600;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+
+        .photo-change-action:hover {
+          color: #B89452;
+        }
+
+        .photo-helper {
+          display: inline;
+          color: #718075;
+          font-size: 13px;
+        }
+
+        .photo-upload-content .photo-format {
+          display: block;
+          width: 100%;
+          color: #718075;
+          font-size: 12px;
+          line-height: 1.5;
+          margin-top: 2px;
+        }
+
+        .photo-revert-button {
+          display: block;
+          margin: 10px auto 0;
+          padding: 5px 10px;
+          border: none;
+          background: transparent;
+          color: #234F3D;
+          font-family: inherit;
+          font-size: 13px;
+          text-decoration: underline;
+          cursor: pointer;
+        }
+
+        .photo-revert-button:hover {
+          color: #B89452;
         }
 
         @media (max-width: 600px) {
@@ -461,65 +657,70 @@ function EditPageContent() {
       `}</style>
 
       <form onSubmit={handleSubmit} className="edit-form">
-      <button
-        type="button"
-        onClick={() => router.push("/my-entries")}
-        style={{
-          marginBottom: "20px",
-          marginLeft: "0",
-          padding: "0",
-          backgroundColor: "transparent",
-          color: "#234F3D",
-          border: "none",
-          cursor: "pointer",
-          fontSize: "14px",
-        }}
-      >
-        ← Cancel / Back to My Entries
-      </button>
-
-      <h1 style={{ marginLeft: "0" }}>Edit Game</h1>
-
-      <div className="language-pair">
-        <div className="form-field">
-          <label htmlFor="title_en">
-            Title (English):
-          </label>
-          <input
-            id="title_en"
-            type="text"
-            name="title_en"
-            value={formData.title_en}
-            onChange={handleChange}
-            disabled={isSubmitting}
-          />
-          {errors.title_en && (
-            <div className="error">{errors.title_en}</div>
+        <button
+          type="button"
+          onClick={() => router.push("/my-entries")}
+          style={{
+            marginBottom: "20px",
+            marginLeft: "0",
+            padding: "0",
+            backgroundColor: "transparent",
+            color: "#234F3D",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "14px",
+          }}
+        >
+          {t(
+            "← Cancel / Back to My Entries",
+            "← បោះបង់ / ត្រឡប់ទៅទិន្នន័យហ្គេមរបស់ខ្ញុំ"
           )}
+        </button>
+
+        <h1 style={{ marginLeft: "0" }}>
+          {t("Edit Game", "កែសម្រួលហ្គេម")}
+        </h1>
+
+        {/* Title */}
+        <div className="language-pair">
+          <div className="form-field">
+            <label htmlFor="title_en">
+              {t("Title (English):", "ចំណងជើង (ភាសាអង់គ្លេស):")}
+            </label>
+            <input
+              id="title_en"
+              type="text"
+              name="title_en"
+              value={formData.title_en}
+              onChange={handleChange}
+              disabled={isSubmitting}
+            />
+            <div className="field-hint">{getLimitHint("title_en")}</div>
+            {errors.title_en && <div className="error">{errors.title_en}</div>}
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="title_kh">
+              {t("Title (Khmer):", "ចំណងជើង (ភាសាខ្មែរ):")}
+            </label>
+            <input
+              id="title_kh"
+              type="text"
+              name="title_kh"
+              value={formData.title_kh}
+              onChange={handleChange}
+              disabled={isSubmitting}
+            />
+            <div className="field-hint">{getLimitHint("title_kh")}</div>
+            {errors.title_kh && <div className="error">{errors.title_kh}</div>}
+          </div>
         </div>
 
-        <div className="form-field">
-          <label htmlFor="title_kh">
-            Title (Khmer):
-          </label>
-          <input
-            id="title_kh"
-            type="text"
-            name="title_kh"
-            value={formData.title_kh}
-            onChange={handleChange}
-            disabled={isSubmitting}
-          />
-          {errors.title_kh && (
-            <div className="error">{errors.title_kh}</div>
-          )}
-        </div>
-      </div>
-
+        {/* Description */}
         <div className="language-pair">
           <div className="form-field">
             <label htmlFor="description_en">
-              Description (English):
+              {t("Description (English):", "ការពិពណ៌នា (ភាសាអង់គ្លេស):")}
             </label>
             <textarea
               id="description_en"
@@ -528,16 +729,15 @@ function EditPageContent() {
               onChange={handleTextareaChange}
               disabled={isSubmitting}
             />
+            <div className="field-hint">{getLimitHint("description_en")}</div>
             {errors.description_en && (
-              <div className="error">
-                {errors.description_en}
-              </div>
+              <div className="error">{errors.description_en}</div>
             )}
           </div>
 
           <div className="form-field">
             <label htmlFor="description_kh">
-              Description (Khmer):
+              {t("Description (Khmer):", "ការពិពណ៌នា (ភាសាខ្មែរ):")}
             </label>
             <textarea
               id="description_kh"
@@ -546,18 +746,18 @@ function EditPageContent() {
               onChange={handleTextareaChange}
               disabled={isSubmitting}
             />
+            <div className="field-hint">{getLimitHint("description_kh")}</div>
             {errors.description_kh && (
-              <div className="error">
-                {errors.description_kh}
-              </div>
+              <div className="error">{errors.description_kh}</div>
             )}
           </div>
         </div>
 
+        {/* How It Is Played */}
         <div className="language-pair">
           <div className="form-field">
             <label htmlFor="how_it_is_played_en">
-              How It Is Played (English):
+              {t("How It Is Played (English):", "របៀបលេង (ភាសាអង់គ្លេស):")}
             </label>
             <textarea
               id="how_it_is_played_en"
@@ -566,16 +766,15 @@ function EditPageContent() {
               onChange={handleTextareaChange}
               disabled={isSubmitting}
             />
+            <div className="field-hint">{getLimitHint("how_it_is_played_en")}</div>
             {errors.how_it_is_played_en && (
-              <div className="error">
-                {errors.how_it_is_played_en}
-              </div>
+              <div className="error">{errors.how_it_is_played_en}</div>
             )}
           </div>
 
           <div className="form-field">
             <label htmlFor="how_it_is_played_kh">
-              How It Is Played (Khmer):
+              {t("How It Is Played (Khmer):", "របៀបលេង (ភាសាខ្មែរ):")}
             </label>
             <textarea
               id="how_it_is_played_kh"
@@ -584,18 +783,18 @@ function EditPageContent() {
               onChange={handleTextareaChange}
               disabled={isSubmitting}
             />
+            <div className="field-hint">{getLimitHint("how_it_is_played_kh")}</div>
             {errors.how_it_is_played_kh && (
-              <div className="error">
-                {errors.how_it_is_played_kh}
-              </div>
+              <div className="error">{errors.how_it_is_played_kh}</div>
             )}
           </div>
         </div>
 
+        {/* Rules */}
         <div className="language-pair">
           <div className="form-field">
             <label htmlFor="rules_en">
-              Rules (English):
+              {t("Rules (English):", "ច្បាប់នៃការលេង (ភាសាអង់គ្លេស):")}
             </label>
             <textarea
               id="rules_en"
@@ -604,14 +803,13 @@ function EditPageContent() {
               onChange={handleTextareaChange}
               disabled={isSubmitting}
             />
-            {errors.rules_en && (
-              <div className="error">{errors.rules_en}</div>
-            )}
+            <div className="field-hint">{getLimitHint("rules_en")}</div>
+            {errors.rules_en && <div className="error">{errors.rules_en}</div>}
           </div>
 
           <div className="form-field">
             <label htmlFor="rules_kh">
-              Rules (Khmer):
+              {t("Rules (Khmer):", "ច្បាប់នៃការលេង (ភាសាខ្មែរ):")}
             </label>
             <textarea
               id="rules_kh"
@@ -620,16 +818,16 @@ function EditPageContent() {
               onChange={handleTextareaChange}
               disabled={isSubmitting}
             />
-            {errors.rules_kh && (
-              <div className="error">{errors.rules_kh}</div>
-            )}
+            <div className="field-hint">{getLimitHint("rules_kh")}</div>
+            {errors.rules_kh && <div className="error">{errors.rules_kh}</div>}
           </div>
         </div>
 
+        {/* Contributor */}
         <div className="language-pair">
           <div className="form-field">
             <label htmlFor="contributor_en">
-              Contributor (English):
+              {t("Contributor (English):", "អ្នកចូលរួមចែករំលែក (ភាសាអង់គ្លេស):")}
             </label>
             <input
               id="contributor_en"
@@ -639,16 +837,15 @@ function EditPageContent() {
               onChange={handleChange}
               disabled={isSubmitting}
             />
+            <div className="field-hint">{getLimitHint("contributor_en")}</div>
             {errors.contributor_en && (
-              <div className="error">
-                {errors.contributor_en}
-              </div>
+              <div className="error">{errors.contributor_en}</div>
             )}
           </div>
 
           <div className="form-field">
             <label htmlFor="contributor_kh">
-              Contributor (Khmer):
+              {t("Contributor (Khmer):", "អ្នកចូលរួមចែករំលែក (ភាសាខ្មែរ):")}
             </label>
             <input
               id="contributor_kh"
@@ -658,18 +855,18 @@ function EditPageContent() {
               onChange={handleChange}
               disabled={isSubmitting}
             />
+            <div className="field-hint">{getLimitHint("contributor_kh")}</div>
             {errors.contributor_kh && (
-              <div className="error">
-                {errors.contributor_kh}
-              </div>
+              <div className="error">{errors.contributor_kh}</div>
             )}
           </div>
         </div>
 
+        {/* Place */}
         <div className="language-pair">
           <div className="form-field">
             <label htmlFor="place_en">
-              Place (English):
+              {t("Place (English):", "ទីកន្លែង (ភាសាអង់គ្លេស):")}
             </label>
             <input
               id="place_en"
@@ -679,14 +876,13 @@ function EditPageContent() {
               onChange={handleChange}
               disabled={isSubmitting}
             />
-            {errors.place_en && (
-              <div className="error">{errors.place_en}</div>
-            )}
+            <div className="field-hint">{getLimitHint("place_en")}</div>
+            {errors.place_en && <div className="error">{errors.place_en}</div>}
           </div>
 
           <div className="form-field">
             <label htmlFor="place_kh">
-              Place (Khmer):
+              {t("Place (Khmer):", "ទីកន្លែង (ភាសាខ្មែរ):")}
             </label>
             <input
               id="place_kh"
@@ -696,36 +892,134 @@ function EditPageContent() {
               onChange={handleChange}
               disabled={isSubmitting}
             />
-            {errors.place_kh && (
-              <div className="error">{errors.place_kh}</div>
-            )}
+            <div className="field-hint">{getLimitHint("place_kh")}</div>
+            {errors.place_kh && <div className="error">{errors.place_kh}</div>}
           </div>
         </div>
 
+        {/* Photo upload */}
         <div className="form-field">
-          <label htmlFor="photo">
-            Photo (optional):
+          <label>
+            {t("Photo:", "រូបថត:")}
           </label>
 
-          <input
-            id="photo"
-            type="file"
-            accept="image/jpeg, image/png, image/webp"
-            onChange={handlePhotoChange}
-            disabled={isSubmitting}
-          />
+          <div className="photo-upload-area">
+            <input
+              id="photo"
+              type="file"
+              accept="image/jpeg, image/png, image/webp"
+              onChange={handlePhotoChange}
+              disabled={isSubmitting}
+              className="photo-input"
+            />
 
-          {errors.photo && (
-            <div className="error">{errors.photo}</div>
+            <div className="photo-upload-content">
+              {(photoPreviewUrl || currentPhotoUrl) ? (
+                <>
+                  <img
+                    src={photoPreviewUrl || currentPhotoUrl}
+                    alt={t(
+                      "Game photo preview",
+                      "រូបភាពមើលជាមុនរបស់ហ្គេម"
+                    )}
+                    className="photo-preview"
+                  />
+
+                  {displayedPhotoFileName && (
+                    <span
+                      className="photo-filename"
+                      title={displayedPhotoFileName}
+                    >
+                      {displayedPhotoFileName}
+                    </span>
+                  )}
+
+                  <div className="photo-action-text">
+                    <label
+                      htmlFor="photo"
+                      className="photo-change-action"
+                    >
+                      {t("Change photo", "ប្តូររូបថត")}
+                    </label>
+
+                    <span className="photo-helper">
+                      {t(
+                        "or Leave unchanged to keep the current photo",
+                        "ឬកុំប្តូរ ដើម្បីរក្សារូបថតបច្ចុប្បន្ន"
+                      )}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="photo-icon">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="34"
+                      height="34"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <path d="m21 15-5-5L5 21" />
+                    </svg>
+                  </div>
+
+                  <strong>
+                    {t("Upload a new photo", "បញ្ចូលរូបថតថ្មី")}
+                  </strong>
+
+                  <label
+                    htmlFor="photo"
+                    className="photo-change-action"
+                  >
+                    {t(
+                      "Click here to choose an image from your device",
+                      "ចុចទីនេះដើម្បីជ្រើសរើសរូបភាពពីឧបករណ៍របស់អ្នក"
+                    )}
+                  </label>
+                </>
+              )}
+
+              <span className="photo-format">
+                {t(
+                  "JPG, PNG or WebP · Maximum 5 MB",
+                  "JPG, PNG ឬ WebP · ទំហំអតិបរមា ៥ MB"
+                )}
+              </span>
+            </div>
+          </div>
+
+          {photoFile && (
+            <button
+              type="button"
+              className="photo-revert-button"
+              onClick={handleRevertPhoto}
+              disabled={isSubmitting}
+            >
+              {currentPhotoUrl
+                ? t("Revert to current photo", "ត្រឡប់ទៅរូបថតបច្ចុប្បន្ន")
+                : t("Remove selected photo", "លុបរូបថតដែលបានជ្រើសរើស")}
+            </button>
           )}
+
+          {errors.photo && <div className="error">{errors.photo}</div>}
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
           disabled={isSubmitting}
           className="submit-button"
         >
-          {isSubmitting ? "Saving..." : "Save Changes"}
+          {isSubmitting
+            ? t("Saving...", "កំពុងរក្សាទុក...")
+            : t("Save Changes", "រក្សាទុកការផ្លាស់ប្តូរ")}
         </button>
       </form>
     </>
