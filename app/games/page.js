@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import EntryCard from "../../components/EntryCard";
 import { createClient } from "../../lib/supabase/client.js";
@@ -22,6 +22,8 @@ export default function Games() {
   const [user, setUser] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [isReviewer, setIsReviewer] = useState(false);
+
+  const profileMenuRef = useRef(null);
 
   // Load the saved language.
   useEffect(() => {
@@ -75,6 +77,34 @@ export default function Games() {
       cancelled = true;
     };
   }, [user, supabase]);
+
+  // Close the profile menu when clicking outside or pressing Escape.
+  useEffect(() => {
+    if (!profileOpen) return;
+
+    const handleOutsideClick = (event) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [profileOpen]);
 
   // Log out the current user.
   const handleLogout = async () => {
@@ -217,6 +247,27 @@ export default function Games() {
             grid-template-columns: 1fr;
           }
         }
+
+        @media (max-width: 480px) {
+          .site-header {
+            position: relative;
+          }
+
+          .user-menu {
+            position: static !important;
+          }
+
+          .profile-dropdown {
+            position: absolute !important;
+            top: 100% !important;
+            left: 12px !important;
+            right: 12px !important;
+            width: auto !important;
+            max-width: none !important;
+            margin-top: 8px !important;
+            box-sizing: border-box !important;
+          }
+        }
       `}</style>
 
       <main
@@ -232,6 +283,7 @@ export default function Games() {
       >
         {/* Navigation */}
         <nav
+          className="site-header"
           style={{
             display: "flex",
             alignItems: "center",
@@ -297,7 +349,11 @@ export default function Games() {
                 )}
 
                 {/* Profile dropdown */}
-                <div style={{ position: "relative" }}>
+                <div
+                  className="user-menu"
+                  ref={profileMenuRef}
+                  style={{ position: "relative" }}
+                >
                   <button
                     type="button"
                     onClick={() => setProfileOpen(!profileOpen)}
@@ -338,6 +394,7 @@ export default function Games() {
 
                   {profileOpen && (
                     <div
+                      className="profile-dropdown"
                       style={{
                         position: "absolute",
                         top: "48px",

@@ -3,7 +3,7 @@
 
 import collection from "../collection.config.js";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "../lib/supabase/client.js";
 
 const colors = {
@@ -29,6 +29,8 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [isReviewer, setIsReviewer] = useState(false);
+
+  const profileMenuRef = useRef(null);
 
   // Homepage carousel
   const [activePhoto, setActivePhoto] = useState(0);
@@ -95,6 +97,34 @@ export default function Home() {
     };
   }, [user, supabase]);
 
+  // Close the profile menu when clicking outside or pressing Escape.
+  useEffect(() => {
+    if (!profileOpen) return;
+
+    const handleOutsideClick = (event) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [profileOpen]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setProfileOpen(false);
@@ -117,7 +147,31 @@ export default function Home() {
 
   return (
     <main style={styles.wrap}>
+      <style>{`
+        @media (max-width: 480px) {
+          .site-header {
+            position: relative;
+          }
+
+          .user-menu {
+            position: static !important;
+          }
+
+          .profile-dropdown {
+            position: absolute !important;
+            top: 100% !important;
+            left: 12px !important;
+            right: 12px !important;
+            width: auto !important;
+            max-width: none !important;
+            margin-top: 8px !important;
+            box-sizing: border-box !important;
+          }
+        }
+      `}</style>
+
       <nav
+        className="site-header"
         style={{
           display: "flex",
           alignItems: "center",
@@ -178,7 +232,11 @@ export default function Home() {
                 </a>
               )}
 
-              <div style={{ position: "relative" }}>
+              <div
+                className="user-menu"
+                ref={profileMenuRef}
+                style={{ position: "relative" }}
+              >
                 <button
                   type="button"
                   onClick={() => setProfileOpen(!profileOpen)}
@@ -219,6 +277,7 @@ export default function Home() {
 
                 {profileOpen && (
                   <div
+                    className="profile-dropdown"
                     style={{
                       position: "absolute",
                       top: "48px",

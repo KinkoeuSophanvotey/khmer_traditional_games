@@ -149,9 +149,13 @@ export default function SignupPage() {
       </h1>
 
       <p style={styles.subtitle}>
-        {lang === "en"
-          ? "Account Created Successfully!"
-          : "គណនីត្រូវបានបង្កើតដោយជោគជ័យ!"}
+        {success
+          ? lang === "en"
+            ? "Account Created Successfully!"
+            : "គណនីត្រូវបានបង្កើតដោយជោគជ័យ!"
+          : lang === "en"
+            ? "Create your account to join the archive community!"
+            : "បង្កើតគណនីរបស់អ្នក ដើម្បីចូលរួមជាមួយសហគមន៍បណ្ណសារ!"}
       </p>
 
       {!success ? (
@@ -222,14 +226,14 @@ export default function SignupPage() {
         <>
           <p style={styles.success}>
             {lang === "en"
-              ? "Your account has been created. You can now return to the homepage and explore the Khmer Traditional Games Archive."
-              : "គណនីរបស់អ្នកត្រូវបានបង្កើតរួចរាល់ហើយ។ ឥឡូវនេះ អ្នកអាចត្រឡប់ទៅទំព័រដើម និងស្វែងយល់អំពីហ្គេមប្រពៃណីខ្មែរបាន។"}
+              ? "Your account has been created successfully. Welcome to the Khmer Traditional Games Archive!"
+              : "គណនីរបស់អ្នកត្រូវបានបង្កើតដោយជោគជ័យ។ សូមស្វាគមន៍មកកាន់បណ្ណសារហ្គេមប្រពៃណីខ្មែរ!"}
           </p>
 
           <a href="/" style={styles.button}>
             {lang === "en" ? "Back to Home Page" : "ត្រឡប់ទៅទំព័រដើម"}
           </a>
-
+          
         </>
       )}
     </main>
