@@ -1,8 +1,9 @@
+
 "use client";
 
 import { use, useEffect, useState } from "react";
 import { createClient } from "../../../lib/supabase/client.js";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 function getLegacyPhoto(title) {
   const titleLower = title.toLowerCase();
@@ -65,12 +66,52 @@ function getOrderIndex(title) {
   return index === -1 ? 999 : index;
 }
 
+// Highlight the searched word.
+function highlightText(text, searchTerm) {
+  const value = String(text || "");
+
+  let search = searchTerm.toLowerCase().trim().replace(/^"|"$/g, "");
+
+  if (
+    (search.startsWith('"') && search.endsWith('"')) ||
+    (search.startsWith("'") && search.endsWith("'"))
+  ) {
+    search = search.slice(1, -1).trim();
+  }
+
+  if (!search) return value;
+
+  const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = value.split(new RegExp(`(${escapedSearch})`, "gi"));
+
+  return parts.map((part, index) =>
+    part.toLowerCase() === search ? (
+      <mark
+        key={index}
+        style={{
+          backgroundColor: "#E8D5A8",
+          color: "#234F3D",
+          padding: "1px 3px",
+          borderRadius: "3px",
+        }}
+      >
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+}
+
 export default function GameDetail({ params }) {
   const { slug } = use(params);
   const index = Number(slug);
 
   const supabase = createClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const searchTerm = searchParams.get("search") || "";
 
   const [lang, setLang] = useState("en");
   const [entry, setEntry] = useState(null);
@@ -267,30 +308,30 @@ export default function GameDetail({ params }) {
             fontWeight: 700,
           }}
         >
-          {entry.title[lang]}
+          {highlightText(entry.title[lang], searchTerm)}
         </h1>
 
-        <p>{entry.description[lang]}</p>
+        <p>{highlightText(entry.description[lang], searchTerm)}</p>
 
         <h2>
           {lang === "en" ? "How It Is Played" : "របៀបលេង"}
         </h2>
-        <p>{entry.howItIsPlayed[lang]}</p>
+        <p>{highlightText(entry.howItIsPlayed[lang], searchTerm)}</p>
 
         <h2>
           {lang === "en" ? "Rules" : "ច្បាប់ក្នុងការលេង"}
         </h2>
-        <p>{entry.rules[lang]}</p>
+        <p>{highlightText(entry.rules[lang], searchTerm)}</p>
 
         <h2>
           {lang === "en" ? "Contributor" : "អ្នកផ្តល់ព័ត៌មាន"}
         </h2>
-        <p>{entry.contributor[lang]}</p>
+        <p>{highlightText(entry.contributor[lang], searchTerm)}</p>
 
         <h2>
           {lang === "en" ? "Place" : "ទីកន្លែង"}
         </h2>
-        <p>{entry.place[lang]}</p>
+        <p>{highlightText(entry.place[lang], searchTerm)}</p>
 
         {userId === entry.owner && (
           <div

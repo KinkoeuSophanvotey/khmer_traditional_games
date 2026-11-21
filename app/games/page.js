@@ -617,6 +617,7 @@ export default function Games() {
                   photoUrl={entry.photoUrl}
                   index={originalIndex}
                   lang={lang}
+                  searchTerm={searchTerm}
                 />
               );
             })}
