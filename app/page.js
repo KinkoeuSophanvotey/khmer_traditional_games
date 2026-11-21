@@ -30,6 +30,18 @@ export default function Home() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [isReviewer, setIsReviewer] = useState(false);
 
+  // Homepage carousel
+  const [activePhoto, setActivePhoto] = useState(0);
+
+  const homepagePhotos = [
+    "/angkor-wat.jpg",
+    "/khlaeng-jarb-kon-morn.jpg",
+    "/champa-champey.jpg",
+    "/Dan-Derm-Sloek-Chhoer.jpg",
+    "/teanh-prot.jpg",
+    "/chol-chhoung.jpg",
+  ];
+
   // Load the saved language.
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") || "en";
@@ -89,6 +101,19 @@ export default function Home() {
   };
 
   const username = user?.user_metadata?.username || "User";
+
+  const showPreviousPhoto = () => {
+    setActivePhoto(
+      (current) =>
+        (current - 1 + homepagePhotos.length) % homepagePhotos.length
+    );
+  };
+
+  const showNextPhoto = () => {
+    setActivePhoto(
+      (current) => (current + 1) % homepagePhotos.length
+    );
+  };
 
   return (
     <main style={styles.wrap}>
@@ -407,17 +432,85 @@ export default function Home() {
             </div>
           </div>
 
-          <img
-            src="/khmer-tradition.jpg"
-            alt="Khmer traditional game"
+          {/* Homepage photo carousel */}
+          <div
             style={{
+              position: "relative",
               width: "100%",
-              aspectRatio: "4 / 3",
-              objectFit: "cover",
-              borderRadius: "16px",
-              display: "block",
             }}
-          />
+          >
+            <img
+              src={homepagePhotos[activePhoto]}
+              alt="Khmer traditional game"
+              style={{
+                width: "100%",
+                aspectRatio: "4 / 3",
+                objectFit: "cover",
+                borderRadius: "16px",
+                display: "block",
+                boxShadow: "0 8px 24px rgba(35, 79, 61, 0.18)",
+                transition: "transform 0.3s ease",
+              }}
+              onMouseEnter={(event) => {
+                event.currentTarget.style.transform = "scale(1.02)";
+              }}
+              onMouseLeave={(event) => {
+                event.currentTarget.style.transform = "scale(1)";
+              }}
+            />
+
+            <button
+              type="button"
+              onClick={showPreviousPhoto}
+              aria-label="Previous photo"
+              style={carouselArrow("left")}
+            >
+              ‹
+            </button>
+
+            <button
+              type="button"
+              onClick={showNextPhoto}
+              aria-label="Next photo"
+              style={carouselArrow("right")}
+            >
+              ›
+            </button>
+          </div>
+
+          {/* Carousel pagination dots */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "9px",
+              marginTop: "16px",
+            }}
+          >
+            {homepagePhotos.map((photo, index) => (
+              <button
+                key={photo}
+                type="button"
+                onClick={() => setActivePhoto(index)}
+                aria-label={`Show photo ${index + 1}`}
+                aria-current={activePhoto === index ? "true" : undefined}
+                style={{
+                  width: activePhoto === index ? "11px" : "9px",
+                  height: activePhoto === index ? "11px" : "9px",
+                  borderRadius: "50%",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  backgroundColor:
+                    activePhoto === index
+                      ? colors.deepGreen
+                      : colors.mutedGold,
+                  transition: "all 0.2s ease",
+                }}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -490,5 +583,26 @@ function languageButton(isActive) {
     fontSize: "13px",
     fontWeight: 600,
     cursor: "pointer",
+  };
+}
+
+function carouselArrow(position) {
+  return {
+    position: "absolute",
+    top: "50%",
+    [position]: "12px",
+    transform: "translateY(-50%)",
+    width: "38px",
+    height: "38px",
+    borderRadius: "50%",
+    border: "1px solid rgba(243, 235, 221, 0.8)",
+    backgroundColor: "rgba(243, 235, 221, 0.85)",
+    color: colors.deepGreen,
+    fontSize: "28px",
+    lineHeight: 1,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   };
 }
