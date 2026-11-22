@@ -160,3 +160,37 @@ npm.cmd run dev
 **6. Open the website in your browser:**
 
 http://localhost:3000
+
+## Section 8: Checklist
+
+- Live URL loads logged out and shows published entries only: yes, [Open Khmer Living Archive](https://khmer-traditional-games.vercel.app/) (tested in Chrome Incognito, 21 November 2026).
+
+- A stranger cannot publish their own entry through the page or the console: yes, tested with a simulated authenticated non-reviewer account in Supabase SQL Editor (21 November 2026).
+
+- Logged out, the API returns nothing pending or returned: yes, tested using the simulated anonymous (`anon`) role in Supabase SQL Editor (21 November 2026).
+
+- Contributors can edit and delete only their own entries: yes, tested using a normal contributor account (21 November 2026).
+
+- No secrets anywhere in the repo history: yes, checked `.gitignore`, tracked files, and Git history for environment files and common secret-key patterns (21 November 2026).
+
+- At least eight real entries, each with a credited source: yes, 9 published entries, all with credited contributors (21 November 2026).
+
+- Khmer renders on every screen a user meets, including the queue: yes, checked in English and Khmer on the Homepage, Games, Login, Sign Up, and Review Queue (21 November 2026).
+
+- Works at phone width: yes, tested in Chrome at 375px screen width in English and Khmer on the Homepage, Games, Login, Sign Up, and Review Queue (21 November 2026).
+
+- No test entries, lorem ipsum or TODO comments in shipped pages: yes, checked the public Homepage and Games page for test entries and placeholder content, and searched project JavaScript, TypeScript, and HTML files for `TODO`, `Lorem ipsum`, `test entry`, and `placeholder text` (21 November 2026).
+
+- No console errors on the main pages: yes, checked the Homepage, Games, Login, Sign Up, and Review Queue on localhost using Chrome Developer Tools Console; no errors appeared after refreshing each page (21 November 2026).
+
+- jesseorndorff is a collaborator on this repo: invitation sent; previous invitation expired, and a new invitation was sent; awaiting acceptance.
+
+- Supabase project restored and awake on 22 November 2026: yes, status shows Healthy.
+
+- Demo video link opens in a private window: yes, [Watch the demo video](https://drive.google.com/file/d/1YECyrXWaggU4hn8BZSOgPoGUOOwQjZ-v/view?usp=sharing).
+
+- Reflection pasted in the Canvas submission: yes.
+
+- Posted in the Show Your Archive discussion: yes.
+
+- Q&A slot booked for: yes, Friday, December 4, 2026, 9:40 AM–9:45 AM (Cambodia time, UTC+07:00).
