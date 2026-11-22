@@ -100,17 +100,17 @@ The information in this collection was gathered from my grandparents, sister, an
 
 | Traditional Game | Contributor | Place |
 |---|---|---|
-| Veay K’aom (Hit the Earthen Pot) | Grandparents | Takeo Province |
+| Veay K’aom (Hit the Earthen Pot) | Grandfather Seang | Takeo Province |
 | Khlaeng Jarb Kon Morn | Bopha | Phnom Penh |
 | Champa Champey | Jing | Takeo Province |
-| Dan Derm Sloek Chhoer (Leaf Grabbing) | Grandparents | Takeo Province |
-| Teanh Prot (Tug of War) | Grandparents | Takeo Province |
+| Dan Derm Sloek Chhoer (Leaf Grabbing) | Grandmother Saman | Takeo Province |
+| Teanh Prot (Tug of War) | Grandfather Seang | Takeo Province |
 | Chol Chhoung | Lish | Takeo Province |
 | Rorm Donderm Kav Eey (Dancing to Seize the Chair) | Jing | Takeo Province |
 | Lout Bav (Jumping Bag Game) | Bopha | Phnom Penh |
 | Bos Angkunh | Lish | Takeo Province |
 
-I would like to thank my grandparents, Jing, Bopha, and Lish for sharing their knowledge and helping document these traditional Khmer games.
+I would like to thank my Grandfather Seang, Grandmother Saman, Jing, Bopha, and Lish for sharing their knowledge and helping document these traditional Khmer games.
 
 Their contributions help preserve cultural knowledge and make it accessible to future generations.
 
